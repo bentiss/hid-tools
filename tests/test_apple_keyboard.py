@@ -154,3 +154,24 @@ class AppleKeyboard(ArrayKeyboard):
 class TestAppleKeyboard(TestArrayKeyboard):
     def create_device(self):
         return AppleKeyboard()
+
+    def test_single_function_key(self):
+        """check for function key reliability."""
+        uhdev = self.uhdev
+        syn_event = self.syn_event
+
+        r = uhdev.event(['F4'])
+        expected = [syn_event]
+        expected.append(libevdev.InputEvent(libevdev.EV_KEY.KEY_DASHBOARD, 1))
+        events = uhdev.next_sync_events()
+        self.debug_reports(r, uhdev, events)
+        self.assertInputEventsIn(expected, events)
+        self.assertEqual(uhdev.evdev.value[libevdev.EV_KEY.KEY_DASHBOARD], 1)
+
+        r = uhdev.event([])
+        expected = [syn_event]
+        expected.append(libevdev.InputEvent(libevdev.EV_KEY.KEY_DASHBOARD, 0))
+        events = uhdev.next_sync_events()
+        self.debug_reports(r, uhdev, events)
+        self.assertInputEventsIn(expected, events)
+        self.assertEqual(uhdev.evdev.value[libevdev.EV_KEY.KEY_DASHBOARD], 0)
