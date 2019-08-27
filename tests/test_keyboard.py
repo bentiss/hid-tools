@@ -69,7 +69,7 @@ class BaseKeyboard(base.UHIDTestDevice):
             setattr(keyboard, key, value)
         return keyboard
 
-    def create_report(self, keys, reportID=None):
+    def create_array_report(self, keys, reportID=None):
         """
         Return an input report for this device.
 
@@ -82,9 +82,9 @@ class BaseKeyboard(base.UHIDTestDevice):
         reportID = reportID or self.default_reportID
 
         keyboard = self._create_report_data()
-        return super().create_report(keyboard, reportID=reportID)
+        return self.create_report(keyboard, reportID=reportID)
 
-    def event(self, keys):
+    def event(self, keys, reportID=None):
         """
         Send an input event on the default report ID.
 
@@ -92,7 +92,7 @@ class BaseKeyboard(base.UHIDTestDevice):
             the list of currently pressed keys, so to release a key, the caller
             needs to call again this function without the key in this tuple.
         """
-        r = self.create_report(keys)
+        r = self.create_array_report(keys, reportID)
         self.call_input_event(r)
         return [r]
 
