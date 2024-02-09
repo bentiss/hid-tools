@@ -520,7 +520,7 @@ class UHIDDevice(object):
 
     def _process_one_event(self: "UHIDDevice") -> None:
         buf = os.read(self._fd, 4380)
-        assert len(buf) == 4380
+        assert (len(buf) == 4380) or (len(buf) == 4376)
         evtype = struct.unpack_from("< L", buf)[0]
         if evtype == UHIDDevice._UHID_START:
             ev, flags = struct.unpack_from("< L Q", buf)
