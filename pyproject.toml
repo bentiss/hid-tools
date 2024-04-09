@@ -20,6 +20,7 @@ classifiers = [
 ]
 dependencies = [
     "click",
+    "libevdev",
     "parse",
     "pyyaml",
     "typing_extensions",
@@ -75,7 +76,6 @@ check = "mypy --install-types --non-interactive {args:.}"
 dependencies = [
   "pytest",
   "pytest-retry",
-  "libevdev",
   "pyudev",
   "attrs",
   "parse",
