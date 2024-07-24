@@ -41,9 +41,9 @@ from typing import (
     cast,
 )
 
-try:
+if sys.version_info >= (3, 10):
     from typing import TypeAlias
-except ImportError:
+else:
     from typing_extensions import TypeAlias
 
 

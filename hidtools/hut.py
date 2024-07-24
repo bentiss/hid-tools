@@ -22,6 +22,7 @@ import os
 from re import Match
 import parse
 import functools
+import sys
 
 from collections import abc
 from typing import (
@@ -37,9 +38,9 @@ from typing import (
     cast,
 )
 
-try:
+if sys.version_info >= (3, 10):
     from typing import TypeAlias
-except ImportError:
+else:
     from typing_extensions import TypeAlias
 
 DATA_DIRNAME = "data"
