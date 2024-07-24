@@ -42,6 +42,8 @@ from typing import (
 
 from pathlib import Path
 
+from pyroute2 import UeventSocket
+
 import logging
 
 logger = logging.getLogger("hidtools.hid.uhid")
@@ -337,6 +339,9 @@ class UHIDDevice(object):
         ):
             raise UHIDIncompleteException("missing uhid initialization")
 
+        kus = UeventSocket()
+        kus.bind()
+
         buf = struct.pack(
             "< L 128s 64s 64s H H L L L L 4096s",
             UHIDDevice._UHID_CREATE2,
@@ -361,28 +366,19 @@ class UHIDDevice(object):
         # and thus need to wait for incoming events. In practice, this
         # works at the first attempt
         found: Optional[Path] = None
-        iterations = 10
-        glob = f"{self.bus:04X}:{self.vid:04X}:{self.pid:04X}.*/uevent"
-        while found is None and iterations > 0:
-            iterations -= 1
-            uhid_path = Path("/sys/devices/virtual/misc/uhid")
-            for p in uhid_path.glob(glob):
-                try:
-                    with open(p) as f:
-                        for line in f.readlines():
-                            if not line.startswith("HID_UNIQ="):
-                                continue
-                            if line[9:].strip() == self.uniq:
-                                found = p
-                                break
-                except FileNotFoundError:
-                    pass
-                except OSError:
-                    pass
-
+        for _ in range(10):
+            for uevent in kus.get():
+                if uevent.get("HID_UNIQ", "") == self.uniq:
+                    found = uevent
+                    break
+            if found is not None:
+                break
             time.sleep(0.001)
         if found is not None:
-            self._sys_path = found.parent
+            self._sys_path = Path("/sys") / uevent["DEVPATH"].lstrip("/")
+            assert (
+                self._sys_path is not None
+            )  # shut up the linter for .name not found in None
             self.hid_id = int(self._sys_path.name[15:], 16)
             self._ready = True
 

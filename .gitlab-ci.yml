@@ -26,6 +26,7 @@ variables:
                  libevdev \
                  click \
                  pyyaml \
+                 pyroute2 \
                  pytest-retry \
                  pytest_tap \
                  pytest-xdist \
@@ -51,7 +52,7 @@ variables:
     jq
   FDO_DISTRIBUTION_VERSION: 40
   FDO_UPSTREAM_REPO: 'libevdev/hid-tools'
-  TEST_CONTAINER_TAG: '2024-07-24.1'
+  TEST_CONTAINER_TAG: '2024-07-24.2'
   BUILD_CONTAINER_TAG: '2024-07-24.1'
   FDO_DISTRIBUTION_TAG: $TEST_CONTAINER_TAG
   KERNEL_VERSION: '6.10'

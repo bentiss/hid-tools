@@ -22,6 +22,7 @@ dependencies = [
     "click",
     "libevdev",
     "parse",
+    "pyroute2",
     "pyyaml",
     "typing_extensions",
 ]
