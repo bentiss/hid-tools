@@ -115,12 +115,12 @@ class HIDIsReady(object):
     def __init__(self: "HIDIsReady", uhid: UHIDDevice) -> None:
         self.uhid = uhid
 
-    def is_ready(self: "HIDIsReady") -> bool:
+    def is_ready(self: "HIDIsReady") -> tuple[bool, int]:
         """
         Overwrite in subclasses: should return True or False whether
         the attached uhid device is ready or not.
         """
-        return False
+        return (False, 0)
 
 
 class UdevHIDIsReady(HIDIsReady):
