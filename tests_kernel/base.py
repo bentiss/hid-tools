@@ -152,6 +152,12 @@ class HidBpf:
     has_rdesc_fixup: bool
 
 
+@dataclasses.dataclass
+class KernelModule:
+    driver_name: str
+    module_name: str
+
+
 class BaseTestCase:
     class TestUhid(object):
         syn_event = libevdev.InputEvent(libevdev.EV_SYN.SYN_REPORT)  # type: ignore
@@ -162,9 +168,9 @@ class BaseTestCase:
 
         # List of kernel modules to load before starting the test
         # if any module is not available (not compiled), the test will skip.
-        # Each element is a tuple '(kernel driver name, kernel module)',
-        # for example ("playstation", "hid-playstation")
-        kernel_modules: List[Tuple[str, str]] = []
+        # Each element is a KernelModule object, for example
+        # KernelModule("playstation", "hid-playstation")
+        kernel_modules: List[KernelModule] = []
 
         # List of in kernel HID-BPF object files to load
         # before starting the test
@@ -239,8 +245,8 @@ class BaseTestCase:
 
         @pytest.fixture()
         def load_kernel_module(self):
-            for kernel_driver, kernel_module in self.kernel_modules:
-                self._load_kernel_module(kernel_driver, kernel_module)
+            for k in self.kernel_modules:
+                self._load_kernel_module(k.driver_name, k.module_name)
             yield
 
         def load_hid_bpfs(self):

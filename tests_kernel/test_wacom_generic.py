@@ -40,7 +40,7 @@ import logging
 
 logger = logging.getLogger("hidtools.test.wacom")
 
-KERNEL_MODULE = ("wacom", "wacom")
+KERNEL_MODULE = base.KernelModule("wacom", "wacom")
 
 
 class ProximityState(Enum):
