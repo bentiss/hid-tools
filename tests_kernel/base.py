@@ -5,6 +5,7 @@
 # Copyright (c) 2017 Benjamin Tissoires <benjamin.tissoires@gmail.com>
 # Copyright (c) 2017 Red Hat, Inc.
 
+import dataclasses
 import libevdev
 import os
 import pytest
@@ -145,6 +146,12 @@ class UHIDTestDevice(BaseDevice):
         self.name = name
 
 
+@dataclasses.dataclass
+class HidBpf:
+    object_name: str
+    has_rdesc_fixup: bool
+
+
 class BaseTestCase:
     class TestUhid(object):
         syn_event = libevdev.InputEvent(libevdev.EV_SYN.SYN_REPORT)  # type: ignore
@@ -163,12 +170,12 @@ class BaseTestCase:
         # before starting the test
         # Any existing pre-loaded HID-BPF module will be removed
         # before the ones in this list will be manually loaded.
-        # Each Element is a tuple '(hid_bpf_object, rdesc_fixup_present)',
-        # for example '("xppen-ArtistPro16Gen2.bpf.o", True)'
-        # If 'rdesc_fixup_present' is True, the test needs to wait
+        # Each Element is a HidBpf object, for example
+        # 'HidBpf("xppen-ArtistPro16Gen2.bpf.o", True)'
+        # If 'has_rdesc_fixup' is True, the test needs to wait
         # for one unbind and rebind before it can be sure the kernel is
         # ready
-        hid_bpfs: List[Tuple[str, bool]] = []
+        hid_bpfs: List[HidBpf] = []
 
         def assertInputEventsIn(self, expected_events, effective_events):
             effective_events = effective_events.copy()
@@ -249,9 +256,9 @@ class BaseTestCase:
             if not udev_hid_bpf:
                 pytest.skip("udev-hid-bpf not found in $PATH, skipping")
 
-            wait = any(rdesc_fixup for _, rdesc_fixup in self.hid_bpfs)
+            wait = any(b.has_rdesc_fixup for b in self.hid_bpfs)
 
-            for hid_bpf, _ in self.hid_bpfs:
+            for hid_bpf in self.hid_bpfs:
                 # We need to start `udev-hid-bpf` in the background
                 # and dispatch uhid events in case the kernel needs
                 # to fetch features on the device
@@ -261,7 +268,7 @@ class BaseTestCase:
                         "--verbose",
                         "add",
                         str(self.uhdev.sys_path),
-                        str(bpf_dir / hid_bpf),
+                        str(bpf_dir / hid_bpf.object_name),
                     ],
                 )
                 while process.poll() is None:
