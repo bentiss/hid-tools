@@ -237,18 +237,19 @@ class BaseTestCase:
             yield
 
         def load_hid_bpfs(self):
+            # this function will only work when run in the kernel tree
             script_dir = Path(os.path.dirname(os.path.realpath(__file__)))
             root_dir = (script_dir / "../../../../..").resolve()
             bpf_dir = root_dir / "drivers/hid/bpf/progs"
+
+            if not bpf_dir.exists():
+                pytest.skip("looks like we are not in the kernel tree, skipping")
 
             udev_hid_bpf = shutil.which("udev-hid-bpf")
             if not udev_hid_bpf:
                 pytest.skip("udev-hid-bpf not found in $PATH, skipping")
 
-            wait = False
-            for _, rdesc_fixup in self.hid_bpfs:
-                if rdesc_fixup:
-                    wait = True
+            wait = any(rdesc_fixup for _, rdesc_fixup in self.hid_bpfs)
 
             for hid_bpf, _ in self.hid_bpfs:
                 # We need to start `udev-hid-bpf` in the background
@@ -266,7 +267,7 @@ class BaseTestCase:
                 while process.poll() is None:
                     self.uhdev.dispatch(1)
 
-                if process.poll() != 0:
+                if process.returncode != 0:
                     pytest.fail(
                         f"Couldn't insert hid-bpf program '{hid_bpf}', marking the test as failed"
                     )
