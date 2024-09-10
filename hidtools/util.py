@@ -27,6 +27,7 @@ class BusType(enum.IntEnum):
         ``linux/input.h``)
     """
 
+    UNKNOWN = 0x00
     PCI = 0x01
     ISAPNP = 0x02
     USB = 0x03
