@@ -339,48 +339,48 @@ class UHIDDevice(object):
         ):
             raise UHIDIncompleteException("missing uhid initialization")
 
-        kus = UeventSocket()
-        kus.bind()
+        with UeventSocket() as kus:
+            kus.bind()
 
-        buf = struct.pack(
-            "< L 128s 64s 64s H H L L L L 4096s",
-            UHIDDevice._UHID_CREATE2,
-            bytes(self._name, "utf-8"),  # name
-            bytes(self._phys, "utf-8"),  # phys
-            bytes(self.uniq, "utf-8"),  # uniq
-            len(self._rdesc),  # rd_size
-            self.bus,  # bus
-            self.vid,  # vendor
-            self.pid,  # product
-            0,  # version
-            0,  # country
-            bytes(self._rdesc),
-        )  # rd_data[HID_MAX_DESCRIPTOR_SIZE]
+            buf = struct.pack(
+                "< L 128s 64s 64s H H L L L L 4096s",
+                UHIDDevice._UHID_CREATE2,
+                bytes(self._name, "utf-8"),  # name
+                bytes(self._phys, "utf-8"),  # phys
+                bytes(self.uniq, "utf-8"),  # uniq
+                len(self._rdesc),  # rd_size
+                self.bus,  # bus
+                self.vid,  # vendor
+                self.pid,  # product
+                0,  # version
+                0,  # country
+                bytes(self._rdesc),
+            )  # rd_data[HID_MAX_DESCRIPTOR_SIZE]
 
-        logger.debug("creating kernel device")
-        n = os.write(self._fd, buf)
-        assert n == len(buf)
+            logger.debug("creating kernel device")
+            n = os.write(self._fd, buf)
+            assert n == len(buf)
 
-        # the kernel creates the device in a worker struct
-        # when we are here, we might still not have the device created
-        # and thus need to wait for incoming events. In practice, this
-        # works at the first attempt
-        found: Optional[Path] = None
-        for _ in range(10):
-            for uevent in kus.get():
-                if uevent.get("HID_UNIQ", "") == self.uniq:
-                    found = uevent
+            # the kernel creates the device in a worker struct
+            # when we are here, we might still not have the device created
+            # and thus need to wait for incoming events. In practice, this
+            # works at the first attempt
+            found: Optional[Path] = None
+            for _ in range(10):
+                for uevent in kus.get():
+                    if uevent.get("HID_UNIQ", "") == self.uniq:
+                        found = uevent
+                        break
+                if found is not None:
                     break
+                time.sleep(0.001)
             if found is not None:
-                break
-            time.sleep(0.001)
-        if found is not None:
-            self._sys_path = Path("/sys") / uevent["DEVPATH"].lstrip("/")
-            assert (
-                self._sys_path is not None
-            )  # shut up the linter for .name not found in None
-            self.hid_id = int(self._sys_path.name[15:], 16)
-            self._ready = True
+                self._sys_path = Path("/sys") / uevent["DEVPATH"].lstrip("/")
+                assert (
+                    self._sys_path is not None
+                )  # shut up the linter for .name not found in None
+                self.hid_id = int(self._sys_path.name[15:], 16)
+                self._ready = True
 
     def destroy(self: "UHIDDevice") -> None:
         """
