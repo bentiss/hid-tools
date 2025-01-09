@@ -20,7 +20,20 @@ variables:
   PYTHON_VERSION: '3.9'
   PYTHON: python$PYTHON_VERSION
   PIP: pip$PYTHON_VERSION
-  TEST_PACKAGES: 'python3.9 python3.10 python3.11 python3.12 python3 make jq systemd-udev libevdev'
+  TEST_PACKAGES: >
+    python3.9
+    python3.10
+    python3.11
+    python3.12
+    python3
+    make
+    jq
+    systemd-udev
+    libevdev
+    virtme-ng
+    qemu-system-x86
+    file
+    binutils
   TEST_EXEC: >  # multi-line yaml that replaces new lines by spaces
     $PYTHON -m ensurepip --upgrade;
     $PYTHON -m pip install --upgrade pip;
@@ -39,6 +52,7 @@ variables:
                  pytest-xdist \
                  typing_extensions
   BUILD_PACKAGES: >
+    awk
     file
     git-core
     gcc
@@ -57,6 +71,7 @@ variables:
     perl-Term-ANSIColor
     perl-Encode
     jq
+    virtme-ng
   FDO_DISTRIBUTION_VERSION: 42
   FDO_UPSTREAM_REPO: 'libevdev/hid-tools'
   TEST_CONTAINER_TAG: '2025-05-14.1'
@@ -104,8 +119,8 @@ test container prep:
     FDO_DISTRIBUTION_PACKAGES: $BUILD_PACKAGES
     FDO_REPO_SUFFIX: build-kernel
 
-.b2c_kernel_url:
-  before_script: &b2c-kernel-url
+.kernel_url:
+  before_script: &kernel-url
     - export KERNEL_URL=${CI_API_V4_URL}/projects/${CI_PROJECT_ID}/packages/generic/kernel-$(arch)/v$KERNEL_VERSION/bzImage
 
 build container prep:
@@ -124,7 +139,7 @@ rebuild kernel:
   needs:
     - build container prep
   script:
-    - *b2c-kernel-url
+    - *kernel-url
     - .gitlab-ci/kernel-build.sh
 
 .default_image:
@@ -153,7 +168,7 @@ install:
 
 pytest:
   extends:
-    - .fdo.b2c-image@fedora
+    - .default_image
   tags:
     - kvm
   stage: test
@@ -161,22 +176,34 @@ pytest:
     - python formatting
     - rebuild kernel
   script:
-    - *b2c-kernel-url
-    - export B2C_KERNEL=$KERNEL_URL
+    - *kernel-url
+    - curl -LO $KERNEL_URL
 
     - echo "[pytest]" > pytest.ini
     - echo "junit_family=xunit2" >> pytest.ini
-    - export B2C_COMMAND="hatch run +py=$PYTHON_VERSION test:pytest -v --junitxml=junit-$CI_JOB_NAME_SLUG.xml tests"
-    - rm -f junit-$CI_JOB_NAME.xml
-    - /app/boot2container
+
+    # first create the hatch environment
+    - hatch env create test.py$PYTHON_VERSION
+
+    - mkdir output
+
+    # the container is executed as root, so vng needs some fine tuning
+    - |
+      vng --run ./bzImage \
+          --user root \
+          --overlay-rwdir=$HOME \
+          --append HOME=$HOME \
+          --overlay-rwdir=$(pwd) \
+          --rwdir=output \
+          --exec "hatch run +py=$PYTHON_VERSION test:pytest -v --junitxml=output/junit-$CI_JOB_NAME_SLUG.xml --color=yes tests"
   artifacts:
     name: "qemu-pytest-logs-$CI_JOB_NAME"
     when: always
     expire_in: 1 week
     paths:
-      - junit-*.xml
+      - output/junit-*.xml
     reports:
-      junit: junit-*.xml
+      junit: output/junit-*.xml
   parallel:
     matrix:
       - PYTHON_VERSION:
@@ -187,7 +214,7 @@ pytest:
 
 pytest kernel:
   extends:
-    - .fdo.b2c-image@fedora
+    - .default_image
   tags:
     - kvm
   stage: test
@@ -195,15 +222,32 @@ pytest kernel:
     - python formatting
     - rebuild kernel
   script:
-    - *b2c-kernel-url
-    - export B2C_KERNEL=$KERNEL_URL
+    - *kernel-url
+    - curl -LO $KERNEL_URL
 
     - echo "[pytest]" > pytest.ini
     - echo "junit_family=xunit2" >> pytest.ini
-    - export B2C_COMMAND="hatch run +py=$PYTHON_VERSION test:pytest -v --udevd --junitxml=junit-$CI_JOB_NAME_SLUG.xml --retries 2"
+
+    # first create the hatch environment
+    - hatch env create test.py$PYTHON_VERSION
+    - mkdir output
+
+    - export COMMAND="hatch run +py=$PYTHON_VERSION test:pytest -v --junitxml=output/junit-$CI_JOB_NAME_SLUG.xml --color=yes --retries 2"
     - rm -f junit-$CI_JOB_NAME.xml
     - set +e # Disable exit on error
-    - /app/boot2container ; echo $? > .exit_code
+
+    # the container is executed as root, so vng needs some fine tuning
+    - |
+      vng --run ./bzImage \
+          --memory=4G \
+          --user root \
+          --overlay-rwdir=$HOME \
+          --append HOME=$HOME \
+          --overlay-rwdir=$(pwd) \
+          --rwdir=output \
+          --exec "$COMMAND"
+    - echo $? > .exit_code
+
     - set -e # Re-enable exit on error
     - cat '.exit_code'
     # pytest uses 2 and above for any errors outside the tests themselves
@@ -216,9 +260,9 @@ pytest kernel:
     when: always
     expire_in: 1 week
     paths:
-      - junit-*.xml
+      - output/junit-*.xml
     reports:
-      junit: junit-*.xml
+      junit: output/junit-*.xml
 
 pytest errors:
   extends:
@@ -228,7 +272,7 @@ pytest errors:
     - pytest kernel
   script:
     - $PIP install yq
-    - errors=`cat junit-*.xml | xq -r '.testsuites.testsuite."@errors"'`
+    - errors=`cat output/junit-*.xml | xq -r '.testsuites.testsuite."@errors"'`
     - test $errors -ne 0 && echo "pytest encountered $errors errors, please fix"
     - echo "See the previous stage for test logs"
     - exit $errors
@@ -242,7 +286,7 @@ pytest failures:
     - pytest kernel
   script:
     - $PIP install yq
-    - failures=`cat junit-*.xml | xq -r '.testsuites.testsuite."@failures"'`
+    - failures=`cat output/junit-*.xml | xq -r '.testsuites.testsuite."@failures"'`
     - test $failures -ne 0 && echo "pytest encountered $failures test case failures"
     - echo "See the previous stage for test logs"
     - exit $failures
