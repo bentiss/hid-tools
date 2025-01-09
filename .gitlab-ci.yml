@@ -20,7 +20,7 @@ variables:
   PYTHON_VERSION: '3.9'
   PYTHON: python$PYTHON_VERSION
   PIP: pip$PYTHON_VERSION
-  TEST_PACKAGES: 'python3.9 python3.10 python3.11 python3 make jq systemd-udev libevdev'
+  TEST_PACKAGES: 'python3.9 python3.10 python3.11 python3.12 python3 make jq systemd-udev libevdev'
   TEST_EXEC: >  # multi-line yaml that replaces new lines by spaces
     $PYTHON -m ensurepip --upgrade;
     $PYTHON -m pip install --upgrade pip;
@@ -57,12 +57,15 @@ variables:
     perl-Term-ANSIColor
     perl-Encode
     jq
-  FDO_DISTRIBUTION_VERSION: 40
+  FDO_DISTRIBUTION_VERSION: 42
   FDO_UPSTREAM_REPO: 'libevdev/hid-tools'
-  TEST_CONTAINER_TAG: '2024-07-24.2'
-  BUILD_CONTAINER_TAG: '2024-07-24.1'
+  TEST_CONTAINER_TAG: '2025-05-14.1'
+  # Fedora 42 ships with gcc15 which defaults to c23, this creates multiple
+  # build issues on kernel < 6.15, so stick to 41 for now.
+  FDO_KERNEL_BUILD_DISTRIBUTION_VERSION: 41
+  BUILD_CONTAINER_TAG: '2025-05-14.3'
   FDO_DISTRIBUTION_TAG: $TEST_CONTAINER_TAG
-  KERNEL_VERSION: '6.10'
+  KERNEL_VERSION: '6.14'
 
 stages:
   - sanity check
@@ -96,6 +99,7 @@ test container prep:
     FDO_DISTRIBUTION_EXEC: $TEST_EXEC
 .build_variables:
   variables:
+    FDO_DISTRIBUTION_VERSION: $FDO_KERNEL_BUILD_DISTRIBUTION_VERSION
     FDO_DISTRIBUTION_TAG: $BUILD_CONTAINER_TAG
     FDO_DISTRIBUTION_PACKAGES: $BUILD_PACKAGES
     FDO_REPO_SUFFIX: build-kernel
