@@ -133,7 +133,7 @@ python formatting:
   extends: .default_image
   stage: build
   script:
-    - ruff format --check .
+    - ruff format --diff .
 
 python lint:
   extends: .default_image
