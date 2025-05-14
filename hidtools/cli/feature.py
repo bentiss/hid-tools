@@ -94,7 +94,7 @@ def list(device, fetch_values, report_id):
     header_printed = False
 
     def print_header():
-        header = f'Feature | Report | {"Usage Page":25s} | {"Usage":42s} | {"Range":9s} | Count | Bits '
+        header = f"Feature | Report | {'Usage Page':25s} | {'Usage':42s} | {'Range':9s} | Count | Bits "
         if fetch_values:
             header += "| Value(s)"
         divisor = "".join(["-" if x != "|" else "|" for x in header])
@@ -119,7 +119,7 @@ def list(device, fetch_values, report_id):
             if len(values) == 1:
                 vstring = f" | {values[0]}"
             else:
-                vstring = f' | {", ".join([str(x) for x in values])}'
+                vstring = f" | {', '.join([str(x) for x in values])}"
         else:
             vstring = ""
 

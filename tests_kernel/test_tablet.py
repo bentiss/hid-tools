@@ -134,13 +134,13 @@ class PenState(Enum):
 
         new_state = PenState((touch, tool, button))  # type: ignore
         if strict:
-            assert (
-                new_state in self.valid_transitions()
-            ), f"moving from {self} to {new_state} is forbidden"
+            assert new_state in self.valid_transitions(), (
+                f"moving from {self} to {new_state} is forbidden"
+            )
         else:
-            assert (
-                new_state in self.historically_tolerated_transitions()
-            ), f"moving from {self} to {new_state} is forbidden"
+            assert new_state in self.historically_tolerated_transitions(), (
+                f"moving from {self} to {new_state} is forbidden"
+            )
 
         return new_state
 
@@ -493,9 +493,9 @@ class Pen(object):
         ):
             return
 
-        assert (
-            evdev.value[axis] == value
-        ), f"assert evdev.value[{axis}] ({evdev.value[axis]}) != {value}"
+        assert evdev.value[axis] == value, (
+            f"assert evdev.value[{axis}] ({evdev.value[axis]}) != {value}"
+        )
 
     def assert_expected_input_events(self, evdev, button):
         assert evdev.value[libevdev.EV_ABS.ABS_X] == self.x

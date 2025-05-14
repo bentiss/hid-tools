@@ -205,7 +205,7 @@ class BaseTestCase:
                 ]
                 try:
                     human_data = [
-                        f'\n\t       {" " * h.index("/")}'.join(h.split("\n"))
+                        f"\n\t       {' ' * h.index('/')}".join(h.split("\n"))
                         for h in human_data
                     ]
                 except ValueError:

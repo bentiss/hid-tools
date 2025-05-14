@@ -333,13 +333,13 @@ class _HidRDescItem(object):
 
     def __repr__(self: "_HidRDescItem") -> str:
         data = [f"{i:02x}" for i in self.bytes]
-        return f'{" ".join(data)}'
+        return f"{' '.join(data)}"
 
     def _get_raw_values(self: "_HidRDescItem") -> str:
         """The raw values as comma-separated hex numbers"""
         data = str(self)
         # prefix each individual value by "0x" and insert "," in between
-        data = f'0x{data.replace(" ", ", 0x")},'
+        data = f"0x{data.replace(' ', ', 0x')},"
         return data
 
     def get_human_descr(self: "_HidRDescItem", indent: int) -> Tuple[str, int]:
@@ -1791,7 +1791,7 @@ class HidReport(object):
                             if usage is None or "no event indicated" in usage.lower():
                                 usage = ""
                         usages.append(f"'{usage}'")
-                output += f'{sep}{logical_name} [{", ".join(usages)}] '
+                output += f"{sep}{logical_name} [{', '.join(usages)}] "
             sep = "|"
             prev = report_item
         return output

@@ -219,7 +219,7 @@ class PS3Controller(JoystickGamepad):
 
     def __init__(self, rdesc=report_descriptor, name="Sony PLAYSTATION(R)3 Controller"):
         super().__init__(rdesc, name=name, input_info=(BusType.USB, 0x054C, 0x0268))
-        self.uniq = ":".join([f"{random.randint(0, 0xff):02x}" for i in range(6)])
+        self.uniq = ":".join([f"{random.randint(0, 0xFF):02x}" for i in range(6)])
         self.buttons = tuple(range(1, 18))
         self.current_mode = "plugged-in"
         self.rumble = PS3Rumble()
@@ -284,7 +284,7 @@ class PS3Controller(JoystickGamepad):
         return 0
 
     def output_report(self, data, size, rtype):
-        logger.debug(f"output_report {data[:size + 1]}, {size}, {rtype}")
+        logger.debug(f"output_report {data[: size + 1]}, {size}, {rtype}")
 
     def create_report(
         self,
@@ -504,7 +504,7 @@ class PS4Controller(BaseGamepad):
 
     def __init__(self, rdesc, name, input_info):
         super().__init__(rdesc, name=name, input_info=input_info)
-        self.uniq = ":".join([f"{random.randint(0, 0xff):02x}" for i in range(6)])
+        self.uniq = ":".join([f"{random.randint(0, 0xFF):02x}" for i in range(6)])
         self.buttons = tuple(range(1, 13))
         self.battery = PSBattery()
 
@@ -1460,7 +1460,7 @@ class PS5Controller(BaseGamepad):
 
     def __init__(self, rdesc, name, input_info):
         super().__init__(rdesc, name=name, input_info=input_info)
-        self.uniq = ":".join([f"{random.randint(0, 0xff):02x}" for i in range(6)])
+        self.uniq = ":".join([f"{random.randint(0, 0xFF):02x}" for i in range(6)])
         self.buttons = tuple(range(1, 13))
         self.battery = PSBattery()
 

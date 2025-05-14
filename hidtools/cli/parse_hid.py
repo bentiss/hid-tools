@@ -49,7 +49,7 @@ def get_report(time, report, rdesc):
             # the `-1` below is to make a better visual effect
             indent_2nd_line = slash - 1
 
-    indent = f'\n{" " * indent_2nd_line}'
+    indent = f"\n{' ' * indent_2nd_line}"
 
     return indent.join(output.split("\n"))
 
