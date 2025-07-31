@@ -545,7 +545,7 @@ class PenDigitizer(base.UHIDTestDevice):
         if pen.current_state == PenState.PEN_IS_OUT_OF_RANGE:
             pen.restore()
 
-        print(f"\n  *** pen is moving to {state} ***")
+        logger.info(f"*** pen is moving to {state} ***")
 
         if state == PenState.PEN_IS_OUT_OF_RANGE:
             pen.backup()
@@ -924,7 +924,7 @@ class XPPen_ArtistPro16Gen2_28bd_095b(PenDigitizer):
         if pen.current_state == PenState.PEN_IS_OUT_OF_RANGE:
             pen.restore()
 
-        print(f"\n  *** pen is moving to {state} ***")
+        logger.debug(f"  *** pen is moving to {state} ***")
 
         if state == PenState.PEN_IS_OUT_OF_RANGE:
             pen.backup()
@@ -1027,7 +1027,7 @@ class XPPen_Artist24_28bd_093a(PenDigitizer):
             pen.restore()
 
         if debug:
-            print(f"\n  *** pen is moving to {state} ***")
+            logger.debug(f"  *** pen is moving to {state} ***")
 
         if state == PenState.PEN_IS_OUT_OF_RANGE:
             pen.backup()
@@ -1164,7 +1164,7 @@ class Huion_Kamvas_Pro_19_256c_006b(PenDigitizer):
             pen.restore()
 
         if debug:
-            print(f"\n  *** pen is moving to {state} ***")
+            logger.debug(f"  *** pen is moving to {state} ***")
 
         if state == PenState.PEN_IS_OUT_OF_RANGE:
             pen.backup()

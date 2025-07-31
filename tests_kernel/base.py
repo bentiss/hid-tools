@@ -238,16 +238,12 @@ class BaseTestCase:
                 data = [f"{d}\n\t ====> {h}" for d, h in zip(data, human_data)]
 
             reports = data
-
-            if len(reports) == 1:
-                print("sending 1 report:")
-            else:
-                print(f"sending {len(reports)} reports:")
+            logger.info(f"sending {len(reports)} report(s):")
             for report in reports:
-                print("\t", report)
+                logger.info(f"   {report}")
 
-            if events is not None:
-                print("events received:", events)
+            if events:
+                logger.info(f"events received: {events}")
 
         def create_device(self):
             raise Exception("please reimplement me in subclasses")
