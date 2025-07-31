@@ -18,7 +18,7 @@ import logging
 from hidtools.device.base_device import BaseDevice, EvdevMatch, SysfsFile
 from hidtools.device.base_gamepad import JoystickGamepad, BaseGamepad
 from pathlib import Path
-from typing import Final
+from typing import Final, Optional
 
 logger = logging.getLogger("hidtools.test.base")
 
@@ -222,6 +222,11 @@ class BaseTestCase:
         def debug_reports(cls, reports, uhdev=None, events=None):
             data = [" ".join([f"{v:02x}" for v in r]) for r in reports]
 
+            @dataclasses.dataclass
+            class PrintableData:
+                data: str
+                human_readable: Optional[str]
+
             if uhdev is not None:
                 human_data = [
                     uhdev.parsed_rdesc.format_report(r, split_lines=True)
@@ -229,18 +234,21 @@ class BaseTestCase:
                 ]
                 try:
                     human_data = [
-                        f"\n\t       {' ' * h.index('/')}".join(h.split("\n"))
-                        for h in human_data
+                        f"{' ' * h.index('/')}".join(h.split("\n")) for h in human_data
                     ]
                 except ValueError:
                     # '/' not found: not a numbered report
-                    human_data = ["\n\t      ".join(h.split("\n")) for h in human_data]
-                data = [f"{d}\n\t ====> {h}" for d, h in zip(data, human_data)]
+                    human_data = ["      ".join(h.split("\n")) for h in human_data]
+                data = [PrintableData(d, h) for d, h in zip(data, human_data)]
+            else:
+                data = [PrintableData(d, None) for d in data]
 
             reports = data
             logger.info(f"sending {len(reports)} report(s):")
             for report in reports:
-                logger.info(f"   {report}")
+                logger.info(f"   {report.data}")
+                if report.human_readable is not None:
+                    logger.info(f"     ===> {report.human_readable}")
 
             if events:
                 logger.info(f"events received: {events}")
