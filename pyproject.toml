@@ -90,3 +90,11 @@ python = ["3.9", "3.10", "3.11", "3.12", "3.13"]
 
 [tool.hatch.envs.test.scripts]
 run = "pytest tests/"
+
+[tool.pytest.ini_options]
+addopts = [
+    "--strict-markers",
+    "--log-format=%(name)-30s %(levelname)-7s %(message)s",
+    "--log-date-format=%Y-%m-%d %H:%M:%S",
+    "--log-level=DEBUG",
+]
