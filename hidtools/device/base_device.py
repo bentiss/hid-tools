@@ -295,6 +295,7 @@ class BaseDevice(UHIDDevice):
         self._kernel_is_ready: HIDIsReady = UdevHIDIsReady(self)
         if rdesc_str is None and rdesc is None:
             raise Exception("Please provide at least a rdesc or rdesc_str")
+        self._input_nodes: Optional[list[EvdevDevice]] = None
         super().__init__()
         if name is None:
             name = f"uhid gamepad test {self.__class__.__name__}"
@@ -306,7 +307,6 @@ class BaseDevice(UHIDDevice):
         self.opened = False
         self.started = False
         self.application = application
-        self._input_nodes: Optional[list[EvdevDevice]] = None
         if rdesc is None:
             assert rdesc_str is not None
             self.rdesc = hid.ReportDescriptor.from_human_descr(rdesc_str)  # type: ignore
