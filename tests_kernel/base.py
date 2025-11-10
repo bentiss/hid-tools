@@ -141,8 +141,8 @@ class UHIDTestDevice(BaseDevice):
         self.application_matches = application_matches
         if name is None:
             name = f"uhid test {self.__class__.__name__}"
-        if not name.startswith("uhid test "):
-            name = "uhid test " + self.name
+        elif not name.startswith("uhid test "):
+            name = "uhid test " + name
         self.name = name
 
 
