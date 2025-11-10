@@ -274,7 +274,8 @@ class UHIDDevice(object):
         """
         data: bytes = bytes(_data)
         buf = struct.pack("< L H 4096s", UHIDDevice._UHID_INPUT2, len(data), data)
-        logger.debug(f"inject {buf[: len(data)].hex(' ')}")
+        # 6 bytes header + data len
+        logger.debug(f"inject {buf[: len(data) + 6].hex(' ')}")
         os.write(self._fd, buf)
 
     @property
