@@ -37,7 +37,7 @@ from hidtools.uhid import UHIDDevice
 from hidtools.util import BusType
 
 from pathlib import Path
-from typing import Any, ClassVar, Dict, List, Optional, Type, Union
+from typing import Any, ClassVar, Optional, Type, Union
 
 logger = logging.getLogger("hidtools.device.base_device")
 
@@ -134,7 +134,7 @@ class HIDIsReady(object):
 class UdevHIDIsReady(HIDIsReady):
     _pyudev_context: ClassVar[Optional[pyudev.Context]] = None
     _pyudev_monitor: ClassVar[Optional[pyudev.Monitor]] = None
-    _uhid_devices: ClassVar[Dict[int, HidReadiness]] = {}
+    _uhid_devices: ClassVar[dict[int, HidReadiness]] = {}
 
     def __init__(self: "UdevHIDIsReady", uhid: UHIDDevice) -> None:
         super().__init__(uhid)
@@ -184,10 +184,10 @@ class EvdevMatch(object):
     def __init__(
         self: "EvdevMatch",
         *,
-        requires: List[Any] = [],
-        excludes: List[Any] = [],
-        req_properties: List[Any] = [],
-        excl_properties: List[Any] = [],
+        requires: list[Any] = [],
+        excludes: list[Any] = [],
+        req_properties: list[Any] = [],
+        excl_properties: list[Any] = [],
     ) -> None:
         self.requires = requires
         self.excludes = excludes
@@ -245,7 +245,7 @@ class EvdevDevice(object):
         return Path("/dev/input") / self.sysfs.name
 
     def matches_application(
-        self: "EvdevDevice", application: str, matches: Dict[str, EvdevMatch]
+        self: "EvdevDevice", application: str, matches: dict[str, EvdevMatch]
     ) -> bool:
         if self.libevdev is None:
             return False
@@ -282,7 +282,7 @@ class EvdevDevice(object):
 class BaseDevice(UHIDDevice):
     # default _application_matches that matches nothing. This needs
     # to be set in the subclasses to have get_evdev() working
-    _application_matches: Dict[str, EvdevMatch] = {}
+    _application_matches: dict[str, EvdevMatch] = {}
 
     def __init__(
         self,
@@ -322,7 +322,7 @@ class BaseDevice(UHIDDevice):
         return PowerSupply(ps[0])
 
     @property
-    def led_classes(self: "BaseDevice") -> List[LED]:
+    def led_classes(self: "BaseDevice") -> list[LED]:
         leds = self.walk_sysfs("led", "**/max_brightness")
         if leds is None:
             return []
@@ -338,7 +338,7 @@ class BaseDevice(UHIDDevice):
         return self._kernel_is_ready.is_ready().count
 
     @property
-    def input_nodes(self: "BaseDevice") -> List[EvdevDevice]:
+    def input_nodes(self: "BaseDevice") -> list[EvdevDevice]:
         if self._input_nodes is not None:
             return self._input_nodes
 
@@ -409,11 +409,11 @@ class BaseDevice(UHIDDevice):
         return []
 
     @property
-    def application_matches(self: "BaseDevice") -> Dict[str, EvdevMatch]:
+    def application_matches(self: "BaseDevice") -> dict[str, EvdevMatch]:
         return self._application_matches
 
     @application_matches.setter
-    def application_matches(self: "BaseDevice", data: Dict[str, EvdevMatch]) -> None:
+    def application_matches(self: "BaseDevice", data: dict[str, EvdevMatch]) -> None:
         self._application_matches = data
 
     def get_evdev(self, application=None):

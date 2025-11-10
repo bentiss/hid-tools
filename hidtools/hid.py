@@ -29,11 +29,9 @@ import logging
 
 from typing import (
     Any,
-    Dict,
     Final,
     IO,
     Iterator,
-    List,
     Optional,
     Tuple,
     Type as _Type,
@@ -182,8 +180,8 @@ sensor_mods: Final = {
     0xF0: "Mod Vendor Reserved",
 }
 
-inv_hid: Dict[U16, str] = {}  # e.g 0b10000000 : "Input"
-hid_type: Dict[str, str] = {}  # e.g. "Input" : "Main"
+inv_hid: dict[U16, str] = {}  # e.g 0b10000000 : "Input"
+hid_type: dict[str, str] = {}  # e.g. "Input" : "Main"
 for type, items in hid_items.items():
     for k, v in items.items():
         inv_hid[v] = k
@@ -285,7 +283,7 @@ class _HidRDescItem(object):
         index_in_report: int,
         hid: U16,
         value: int,
-        raw_values: List[U8],
+        raw_values: list[U8],
     ) -> None:
         self.index_in_report = index_in_report
         self.raw_value = raw_values
@@ -318,7 +316,7 @@ class _HidRDescItem(object):
         return 1 + len(self.raw_value)
 
     @property
-    def bytes(self: "_HidRDescItem") -> List[U8]:
+    def bytes(self: "_HidRDescItem") -> list[U8]:
         """
         Return this in the original format in bytes, i.e. a header byte
         followed by (if any) payload bytes.
@@ -433,7 +431,7 @@ class _HidRDescItem(object):
 
     @classmethod
     def _one_item_from_bytes(
-        cls: _Type["_HidRDescItem"], rdesc: Union[Bytes, List[U8]]
+        cls: _Type["_HidRDescItem"], rdesc: Union[Bytes, list[U8]]
     ) -> Optional["_HidRDescItem"]:
         """
         Parses a single (the first) item from the given report descriptor.
@@ -490,9 +488,9 @@ class _HidRDescItem(object):
         cls: _Type["_HidRDescItem"],
         rdesc: Union[
             Bytes,
-            List[U8],
+            list[U8],
         ],
-    ) -> List["_HidRDescItem"]:
+    ) -> list["_HidRDescItem"]:
         """
         Parses a series of bytes into items.
 
@@ -741,7 +739,7 @@ class HidUnit(object):
         ENGLISH_ROTATION: Final = 4
 
         @classmethod
-        def _stringmap(cls: _Type["HidUnit.System"]) -> Dict["HidUnit.System", str]:
+        def _stringmap(cls: _Type["HidUnit.System"]) -> dict["HidUnit.System", str]:
             return {
                 HidUnit.System.NONE: "None",
                 HidUnit.System.SI_LINEAR: "SILinear",
@@ -850,7 +848,7 @@ class HidUnit(object):
             }[self]
 
     def __init__(
-        self: "HidUnit", system: "HidUnit.System", units: Dict[Optional["Unit"], U16]
+        self: "HidUnit", system: "HidUnit.System", units: dict[Optional["Unit"], U16]
     ) -> None:
         self.units = units
         self.system = system
@@ -958,7 +956,7 @@ class HidUnit(object):
             return HidUnit.NONE
 
         unitstrings = unit_string.split(" * ")
-        units: Dict[Optional["Unit"], U16] = {}
+        units: dict[Optional["Unit"], U16] = {}
         for s in unitstrings:
             match: Optional[re.Match[str]]
             match = re.match(r"(?P<unit>[a-zA-z]+)(?P<exp>[⁰¹²³⁴⁵⁶⁷⁸⁹⁻]{1,})?", s)
@@ -1077,7 +1075,7 @@ class HidField(object):
         self.type = value
         self.usage_page = usage_page
         self.usage = usage
-        self.usages: Optional[List[U32]] = None
+        self.usages: Optional[list[U32]] = None
         self.logical_min = logical_min
         self.logical_max = logical_max
         self.physical_min = physical_min
@@ -1171,7 +1169,7 @@ class HidField(object):
                 pass
         return _logical
 
-    def _get_value(self: "HidField", report: List[U8], idx: int) -> Union[U32, str]:
+    def _get_value(self: "HidField", report: list[U8], idx: int) -> Union[U32, str]:
         """
         Extract the bits that are this HID field in the list of bytes
         ``report``
@@ -1197,7 +1195,7 @@ class HidField(object):
             value = twos_comp(value, self.size)
         return value
 
-    def get_values(self: "HidField", report: List[U8]) -> List[Union[U32, str]]:
+    def get_values(self: "HidField", report: list[U8]) -> list[Union[U32, str]]:
         """
         Assume ``report`` is a list of bytes that are a full HID report,
         extract the values that are this HID field.
@@ -1214,7 +1212,7 @@ class HidField(object):
         """
         return [self._get_value(report, i) for i in range(self.count)]
 
-    def _fill_value(self: "HidField", report: List[U8], value: U32, idx: int) -> None:
+    def _fill_value(self: "HidField", report: list[U8], value: U32, idx: int) -> None:
         start_bit = self.start + self.size * idx
         n = self.size
 
@@ -1243,7 +1241,7 @@ class HidField(object):
             report[byte_idx] &= ~(bit_mask << bit_shift)
             report[byte_idx] |= value << bit_shift
 
-    def fill_values_array(self: "HidField", report: List[U8], data: List[Any]) -> None:
+    def fill_values_array(self: "HidField", report: list[U8], data: list[Any]) -> None:
         """
         Assuming ``data`` is the value for this HID field array and ``report``
         is a HID report's bytes, this method sets those bits in ``report`` that
@@ -1267,7 +1265,7 @@ class HidField(object):
         if len(data) > self.count:
             raise Exception("-EINVAL")
 
-        array: List[int] = []
+        array: list[int] = []
 
         for usage_name in data:
             try:
@@ -1291,7 +1289,7 @@ class HidField(object):
 
             self._fill_value(report, v, idx)
 
-    def fill_values(self: "HidField", report: List[U8], data: List[U32]) -> None:
+    def fill_values(self: "HidField", report: list[U8], data: list[U32]) -> None:
         """
         Assuming ``data`` is the value for this HID field and ``report`` is
         a HID report's bytes, this method sets those bits in ``report`` that
@@ -1375,7 +1373,7 @@ class HidField(object):
         collection: Optional[Tuple[U32, U32, U32]],
         value: U32,
         usage_page: U16,
-        usages: List[U32],
+        usages: list[U32],
         usage_min: U32,
         usage_max: U32,
         logical_min: U32,
@@ -1492,7 +1490,7 @@ class HidReport(object):
         application: Optional[U32],
         type: "HidReport.Type",
     ) -> None:
-        self.fields: List[HidField] = []
+        self.fields: list[HidField] = []
         self.report_ID = report_ID
         self.application = application
         self._application_name: Optional[str] = None
@@ -1512,7 +1510,7 @@ class HidReport(object):
         field.start = self._bitsize
         self._bitsize += field.size
 
-    def extend(self: "HidReport", fields: List[HidField]) -> None:
+    def extend(self: "HidReport", fields: list[HidField]) -> None:
         """
         Extend this report by the list of :class:`HidField`
         objects
@@ -1587,10 +1585,10 @@ class HidReport(object):
 
     def _format_one_event(
         self: "HidReport",
-        data: List[Any],
+        data: list[Any],
         global_data: Any,
         hidInputItem: HidField,
-        r_out: List[U8],
+        r_out: list[U8],
     ) -> None:
         """
         Fill in the report array ``r_out`` with the data for this input
@@ -1650,7 +1648,7 @@ class HidReport(object):
         self.prev_collection = hidInputItem.collection
         self.prev_seen_usages.append(usage)
 
-    def create_report(self: "HidReport", data: List[Any], global_data: Any) -> List[U8]:
+    def create_report(self: "HidReport", data: list[Any], global_data: Any) -> list[U8]:
         """
         Convert the data object to an array of ints representing this report.
         Each property of the given data object is matched against the field
@@ -1668,7 +1666,7 @@ class HidReport(object):
         The HidReport will create the report according to the device's
         report descriptor.
         """
-        self.prev_seen_usages: List[str] = []
+        self.prev_seen_usages: list[str] = []
         self.prev_collection = None
         r = [0] * self.size
 
@@ -1685,7 +1683,7 @@ class HidReport(object):
         return r
 
     def format_report(
-        self: "HidReport", data: List[Any], split_lines: bool = True
+        self: "HidReport", data: list[Any], split_lines: bool = True
     ) -> str:
         """
         Format the HID Report provided as a list of 8-bit integers into a
@@ -1699,7 +1697,7 @@ class HidReport(object):
 
         output = ""
 
-        self.prev_seen_usages = []
+        self.prev_seen_usages: list[str] = []
         self.prev_collection = None
         sep = ""
         if self.numbered:
@@ -1869,23 +1867,23 @@ class ReportDescriptor(object):
         """
 
         def __init__(self: "ReportDescriptor._Locals") -> None:
-            self.usages: List[U32] = []
-            self.usage_sizes: List[int] = []
+            self.usages: list[U32] = []
+            self.usage_sizes: list[int] = []
             self.usage_min: U32 = 0
             self.usage_max: U32 = 0
             self.usage_max_size: U32 = 0
             self.report_ID: U8 = -1
 
-    def __init__(self: "ReportDescriptor", items: List[_HidRDescItem]) -> None:
-        self.input_reports: Dict[U8, HidReport] = {}
-        self.feature_reports: Dict[U8, HidReport] = {}
-        self.output_reports: Dict[U8, HidReport] = {}
+    def __init__(self: "ReportDescriptor", items: list[_HidRDescItem]) -> None:
+        self.input_reports: dict[U8, HidReport] = {}
+        self.feature_reports: dict[U8, HidReport] = {}
+        self.output_reports: dict[U8, HidReport] = {}
         self.win8: bool = False
         self.rdesc_items = items
 
         # variables only used during parsing
-        self.global_stack: List["ReportDescriptor._Globals"] = []
-        self.collection: List[U32] = [0, 0, 0]  # application, physical, logical
+        self.global_stack: list["ReportDescriptor._Globals"] = []
+        self.collection: list[U32] = [0, 0, 0]  # application, physical, logical
         self.local = ReportDescriptor._Locals()
         self.glob: "ReportDescriptor._Globals" = ReportDescriptor._Globals()
         self.current_item = None
@@ -2123,7 +2121,7 @@ class ReportDescriptor(object):
         return sum([item.size for item in self.rdesc_items])
 
     @property
-    def bytes(self: "ReportDescriptor") -> List[U8]:
+    def bytes(self: "ReportDescriptor") -> list[U8]:
         """
         This report descriptor as a list of 8-bit integers.
         """
@@ -2134,7 +2132,7 @@ class ReportDescriptor(object):
 
     @classmethod
     def from_bytes(
-        cls: _Type["ReportDescriptor"], rdesc: Union[Bytes, List[U8]]
+        cls: _Type["ReportDescriptor"], rdesc: Union[Bytes, list[U8]]
     ) -> "ReportDescriptor":
         """
         Parse the given list of 8-bit integers.
@@ -2207,7 +2205,7 @@ class ReportDescriptor(object):
         global_data: Optional[Any] = None,
         reportID: Optional[U8] = None,
         application: Optional[Union[str, U32]] = None,
-    ) -> List[U8]:
+    ) -> list[U8]:
         """
         Convert the data object to an array of ints representing the report.
         Each property of the given data object is matched against the field

@@ -30,10 +30,8 @@ from hidtools.hut import U8, U32
 from typing import (
     Any,
     Callable,
-    Dict,
     Final,
     Iterable,
-    List,
     Optional,
     Tuple,
     Type,
@@ -93,9 +91,9 @@ class UHIDDevice(object):
     UHID_OUTPUT_REPORT: Final = 1
     UHID_INPUT_REPORT: Final = 2
 
-    _polling_functions: Dict[int, Callable[[], None]] = {}
+    _polling_functions: dict[int, Callable[[], None]] = {}
     _poll = select.poll()
-    _devices: List["UHIDDevice"] = []
+    _devices: list["UHIDDevice"] = []
 
     @classmethod
     def dispatch(cls: Type["UHIDDevice"], timeout: Optional[float] = None) -> bool:
@@ -137,7 +135,7 @@ class UHIDDevice(object):
     def __init__(self: "UHIDDevice") -> None:
         self._name: Optional[str] = None
         self._phys: Optional[str] = ""
-        self._rdesc: Optional[List[int]] = None
+        self._rdesc: Optional[list[int]] = None
         self.parsed_rdesc: Optional[hidtools.hid.ReportDescriptor] = None
         self._info: Optional[Tuple[int, int, int]] = None
         self._bustype: Optional[BusType] = None
@@ -170,7 +168,7 @@ class UHIDDevice(object):
         return self._fd
 
     @property
-    def rdesc(self: "UHIDDevice") -> Optional[List[int]]:
+    def rdesc(self: "UHIDDevice") -> Optional[list[int]]:
         """
         The device's report descriptor
         """
@@ -255,7 +253,7 @@ class UHIDDevice(object):
         buf = struct.pack("< L L H", UHIDDevice._UHID_SET_REPORT_REPLY, req, err)
         os.write(self._fd, buf)
 
-    def _call_get_report(self: "UHIDDevice", req: U8, data: List[U8], err: int) -> None:
+    def _call_get_report(self: "UHIDDevice", req: U8, data: list[U8], err: int) -> None:
         bdata = bytes(data)
         buf = struct.pack(
             "< L L H H 4096s",
@@ -301,7 +299,7 @@ class UHIDDevice(object):
         return tuple(self._sys_path.glob(glob))
 
     @property
-    def device_nodes(self) -> List[str]:
+    def device_nodes(self) -> list[str]:
         """
         A list of evdev nodes associated with this HID device. Populating
         this list requires the kernel to process the uhid device, and sometimes
@@ -312,7 +310,7 @@ class UHIDDevice(object):
         return [f"/dev/input/{e.name}" for e in self.walk_sysfs("evdev")]
 
     @property
-    def hidraw_nodes(self) -> List[str]:
+    def hidraw_nodes(self) -> list[str]:
         """
         A list of hidraw nodes associated with this HID device. Populating
         this list requires the kernel to process the uhid device, and sometimes
@@ -447,7 +445,7 @@ class UHIDDevice(object):
         logger.debug("close")
 
     def set_report(
-        self: "UHIDDevice", req: int, rnum: int, rtype: int, data: List[int]
+        self: "UHIDDevice", req: int, rnum: int, rtype: int, data: list[int]
     ) -> int:
         """
         Callback invoked when a process calls SetReport on this UHID device.
@@ -465,7 +463,7 @@ class UHIDDevice(object):
         return 5  # EIO
 
     def _set_report(
-        self: "UHIDDevice", req: int, rnum: int, rtype: int, size: int, data: List[int]
+        self: "UHIDDevice", req: int, rnum: int, rtype: int, size: int, data: list[int]
     ) -> None:
         logger.debug(
             "set report {} {} {} {} {} ".format(
@@ -478,7 +476,7 @@ class UHIDDevice(object):
 
     def get_report(
         self: "UHIDDevice", req: int, rnum: int, rtype: int
-    ) -> Tuple[int, List[U8]]:
+    ) -> Tuple[int, list[U8]]:
         """
         Callback invoked when a process calls SetReport on this UHID device.
 
@@ -501,7 +499,7 @@ class UHIDDevice(object):
             self._call_get_report(req, data, error)
 
     def output_report(
-        self: "UHIDDevice", data: List[int], size: int, rtype: int
+        self: "UHIDDevice", data: list[int], size: int, rtype: int
     ) -> None:
         """
         Callback invoked when a process sends raw data to the device.
@@ -545,7 +543,7 @@ class UHIDDevice(object):
         global_data=None,
         reportID: Optional[int] = None,
         application: Optional[Union[str, U32]] = None,
-    ) -> List[U8]:
+    ) -> list[U8]:
         """
         Convert the data object to an array of ints representing the report.
         Each property of the given data object is matched against the field

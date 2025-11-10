@@ -28,7 +28,6 @@ from collections import abc
 from typing import (
     Annotated,
     Any,
-    Dict,
     Hashable,
     Iterator,
     NamedTuple,
@@ -165,7 +164,7 @@ class HidUsagePage(object):
     """
 
     def __init__(self: "HidUsagePage") -> None:
-        self._usages: Dict[U16, HidUsage] = {}
+        self._usages: dict[U16, HidUsage] = {}
 
     def __setitem__(self: "HidUsagePage", key: U16, value: HidUsage) -> None:
         self._usages[key] = value
@@ -224,7 +223,7 @@ class HidUsagePage(object):
         self._name = name
 
     @property
-    def from_name(self: "HidUsagePage") -> Dict[str, HidUsage]:
+    def from_name(self: "HidUsagePage") -> dict[str, HidUsage]:
         """
         A dictionary using ``{ name: usage }`` mapping, to look up the
         :class:`HidUsage` based on a name.
@@ -232,18 +231,18 @@ class HidUsagePage(object):
         try:
             return self._inverted
         except AttributeError:
-            self._inverted: Dict[str, HidUsage] = {}
+            self._inverted: dict[str, HidUsage] = {}
             for _, v in self.items():
                 self._inverted[v.name] = v
             return self._inverted
 
     @property
-    def from_usage(self: "HidUsagePage") -> Dict[U16, HidUsage]:
+    def from_usage(self: "HidUsagePage") -> dict[U16, HidUsage]:
         """
         A dictionary using ``{ usage: name }`` mapping, to look up the name
         based on a page ID . This is the same as using the object itself.
         """
-        return cast(Dict[U16, HidUsage], self)
+        return cast(dict[U16, HidUsage], self)
 
 
 class HidUsageTable(object):
@@ -274,7 +273,7 @@ class HidUsageTable(object):
     """
 
     def __init__(self: "HidUsageTable") -> None:
-        self._pages: Dict[U16, HidUsagePage] = {}
+        self._pages: dict[U16, HidUsagePage] = {}
 
     def __setitem__(self: "HidUsageTable", key: U16, value: HidUsagePage) -> None:
         self._pages[key] = value
@@ -304,7 +303,7 @@ class HidUsageTable(object):
         return self._pages.items()
 
     @property
-    def usage_pages(self: "HidUsageTable") -> Dict[U16, HidUsagePage]:
+    def usage_pages(self: "HidUsageTable") -> dict[U16, HidUsagePage]:
         """
         A dictionary mapping ``{page_id : object}``. These two are
         equivalent calls: ::
@@ -316,7 +315,7 @@ class HidUsageTable(object):
         return self._pages
 
     @property
-    def usage_page_names(self: "HidUsageTable") -> Dict[str, HidUsagePage]:
+    def usage_page_names(self: "HidUsageTable") -> dict[str, HidUsagePage]:
         """
         A dictionary mapping ``{page_name : object}``. These two are
         equivalent calls: ::

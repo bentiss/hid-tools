@@ -17,8 +17,6 @@
 import os
 import sys
 
-from typing import Dict, List
-
 sys.path.insert(0, os.path.abspath("../../"))
 sys.path.insert(0, os.path.abspath("../../hidtools"))
 sys.path.insert(0, os.path.abspath("../../tests"))
@@ -74,7 +72,7 @@ language = None
 # List of patterns, relative to source directory, that match files and
 # directories to ignore when looking for source files.
 # This pattern also affects html_static_path and html_extra_path .
-exclude_patterns: List[str] = []
+exclude_patterns: list[str] = []
 
 add_module_names = False
 
@@ -119,7 +117,7 @@ htmlhelp_basename = "hid-toolsdoc"
 
 # -- Options for LaTeX output ------------------------------------------------
 
-latex_elements: Dict[str, str] = {
+latex_elements: dict[str, str] = {
     # The paper size ('letterpaper' or 'a4paper').
     #
     # 'papersize': 'letterpaper',

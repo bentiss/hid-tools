@@ -14,7 +14,7 @@ from .base import HidBpf
 import libevdev
 import logging
 import pytest
-from typing import Dict, List, Optional, Tuple
+from typing import Optional, Tuple
 
 logger = logging.getLogger("hidtools.test.tablet")
 
@@ -96,7 +96,7 @@ class PenState(Enum):
         return cls((touch, tool, button))  # type: ignore
 
     def apply(
-        self, events: List[libevdev.InputEvent], strict: bool, test_button: BtnPressed
+        self, events: list[libevdev.InputEvent], strict: bool, test_button: BtnPressed
     ) -> "PenState":
         if libevdev.EV_SYN.SYN_REPORT in events:
             raise ValueError("EV_SYN is in the event sequence")
@@ -269,7 +269,7 @@ class PenState(Enum):
         return tuple()
 
     @staticmethod
-    def legal_transitions() -> Dict[str, Tuple["PenState", ...]]:
+    def legal_transitions() -> dict[str, Tuple["PenState", ...]]:
         """This is the first half of the Windows Pen Implementation state machine:
         we don't have Invert nor Erase bits, so just move in/out-of-range or proximity.
         https://docs.microsoft.com/en-us/windows-hardware/design/component-guidelines/windows-pen-states
@@ -295,7 +295,7 @@ class PenState(Enum):
         }
 
     @staticmethod
-    def legal_transitions_with_invert() -> Dict[str, Tuple["PenState", ...]]:
+    def legal_transitions_with_invert() -> dict[str, Tuple["PenState", ...]]:
         """This is the second half of the Windows Pen Implementation state machine:
         we now have Invert and Erase bits, so move in/out or proximity with the intend
         to erase.
@@ -333,7 +333,7 @@ class PenState(Enum):
         }
 
     @staticmethod
-    def legal_transitions_with_button() -> Dict[str, Tuple["PenState", ...]]:
+    def legal_transitions_with_button() -> dict[str, Tuple["PenState", ...]]:
         """We revisit the Windows Pen Implementation state machine:
         we now have a button.
         """
@@ -382,7 +382,7 @@ class PenState(Enum):
         }
 
     @staticmethod
-    def tolerated_transitions() -> Dict[str, Tuple["PenState", ...]]:
+    def tolerated_transitions() -> dict[str, Tuple["PenState", ...]]:
         """This is not adhering to the Windows Pen Implementation state machine
         but we should expect the kernel to behave properly, mostly for historical
         reasons."""
@@ -395,7 +395,7 @@ class PenState(Enum):
         }
 
     @staticmethod
-    def tolerated_transitions_with_invert() -> Dict[str, Tuple["PenState", ...]]:
+    def tolerated_transitions_with_invert() -> dict[str, Tuple["PenState", ...]]:
         """This is the second half of the Windows Pen Implementation state machine:
         we now have Invert and Erase bits, so move in/out or proximity with the intend
         to erase.
@@ -410,7 +410,7 @@ class PenState(Enum):
         }
 
     @staticmethod
-    def broken_transitions() -> Dict[str, Tuple["PenState", ...]]:
+    def broken_transitions() -> dict[str, Tuple["PenState", ...]]:
         """Those tests are definitely not part of the Windows specification.
         However, a half broken device might export those transitions.
         For example, a pen that has the eraser button might wobble between

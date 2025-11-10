@@ -27,7 +27,7 @@ from parse import parse, findall
 
 from hidtools.device.base_device import BaseDevice
 from hidtools.device.sony_gamepad import PS3Controller
-from typing import Dict, Tuple, Type
+from typing import Tuple, Type
 
 import logging
 
@@ -37,7 +37,7 @@ logger = logging.getLogger("hidtools.replay")
 
 
 class HIDReplay(object):
-    _known_devices: Dict[Tuple[int, int], Type[BaseDevice]] = {
+    _known_devices: dict[Tuple[int, int], Type[BaseDevice]] = {
         (0x054C, 0x0268): PS3Controller
     }
 

@@ -18,7 +18,7 @@ import logging
 from hidtools.device.base_device import BaseDevice, EvdevMatch, SysfsFile
 from hidtools.device.base_gamepad import JoystickGamepad, BaseGamepad
 from pathlib import Path
-from typing import Final, List
+from typing import Final
 
 logger = logging.getLogger("hidtools.test.base")
 
@@ -194,7 +194,7 @@ class BaseTestCase:
         # if any module is not available (not compiled), the test will skip.
         # Each element is a KernelModule object, for example
         # KernelModule("playstation", "hid-playstation")
-        kernel_modules: List[KernelModule] = []
+        kernel_modules: list[KernelModule] = []
 
         # List of in kernel HID-BPF object files to load
         # before starting the test
@@ -205,7 +205,7 @@ class BaseTestCase:
         # If 'has_rdesc_fixup' is True, the test needs to wait
         # for one unbind and rebind before it can be sure the kernel is
         # ready
-        hid_bpfs: List[HidBpf] = []
+        hid_bpfs: list[HidBpf] = []
 
         def assertInputEventsIn(self, expected_events, effective_events):
             effective_events = effective_events.copy()
