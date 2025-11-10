@@ -510,7 +510,7 @@ class Pen(object):
         if button is not None:
             buttons.remove(button)
         for b in buttons:
-            assert evdev.value[b.value] is None or evdev.value[b.value] == False
+            assert evdev.value[b.value] is None or not evdev.value[b.value]
 
         assert self.current_state == PenState.from_evdev(evdev, button)
 

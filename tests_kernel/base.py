@@ -17,7 +17,7 @@ import logging
 
 from hidtools.device.base_device import BaseDevice, EvdevMatch, SysfsFile
 from pathlib import Path
-from typing import Final, List, Tuple
+from typing import Final, List
 
 logger = logging.getLogger("hidtools.test.base")
 
@@ -296,7 +296,7 @@ class BaseTestCase:
 
                 if self.uhdev.kernel_ready_count < 2:
                     pytest.fail(
-                        f"Couldn't insert hid-bpf programs, marking the test as failed"
+                        "Couldn't insert hid-bpf programs, marking the test as failed"
                     )
 
         def unload_hid_bpfs(self):
@@ -305,7 +305,7 @@ class BaseTestCase:
             )
             if ret.returncode != 0:
                 pytest.fail(
-                    f"Couldn't unload hid-bpf programs, marking the test as failed"
+                    "Couldn't unload hid-bpf programs, marking the test as failed"
                 )
 
         @pytest.fixture()

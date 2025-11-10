@@ -2,7 +2,6 @@
 import libevdev
 
 from hidtools.device.base_device import BaseDevice
-from hidtools.util import BusType
 
 
 class InvalidHIDCommunication(Exception):

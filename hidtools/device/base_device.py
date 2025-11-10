@@ -37,7 +37,7 @@ from hidtools.uhid import UHIDDevice
 from hidtools.util import BusType
 
 from pathlib import Path
-from typing import Any, ClassVar, Dict, List, Optional, Tuple, Type, Union
+from typing import Any, ClassVar, Dict, List, Optional, Type, Union
 
 logger = logging.getLogger("hidtools.device.base_device")
 
