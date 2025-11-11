@@ -10,7 +10,7 @@ from . import base
 import libevdev
 import pytest
 
-from hidtools.device.base_gamepad import BaseGamepad, JoystickGamepad, AxisMapping
+from hidtools.device.base_gamepad import AxisMapping
 from hidtools.util import BusType
 from .base import HidBpf
 
@@ -201,7 +201,7 @@ class BaseTest:
             )
 
 
-class SaitekGamepad(JoystickGamepad):
+class SaitekGamepad(base.UHIDTestJoystickGamepad):
     # fmt: off
     report_descriptor = [
         0x05, 0x01,                    # Usage Page (Generic Desktop)        0
@@ -512,7 +512,7 @@ class SaitekGamepad(JoystickGamepad):
         self.buttons = (1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12)
 
 
-class AsusGamepad(BaseGamepad):
+class AsusGamepad(base.UHIDTestGamepad):
     # fmt: off
     report_descriptor = [
         0x05, 0x01,                    # Usage Page (Generic Desktop)        0
@@ -610,7 +610,7 @@ class AsusGamepad(BaseGamepad):
         self.buttons = (1, 2, 4, 5, 7, 8, 14, 15, 13)
 
 
-class RaptorMach2Joystick(JoystickGamepad):
+class RaptorMach2Joystick(base.UHIDTestJoystickGamepad):
     axes_map = {
         "left_stick": {
             "x": AxisMapping("x"),

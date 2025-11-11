@@ -16,6 +16,7 @@ import time
 import logging
 
 from hidtools.device.base_device import BaseDevice, EvdevMatch, SysfsFile
+from hidtools.device.base_gamepad import JoystickGamepad, BaseGamepad
 from pathlib import Path
 from typing import Final, List
 
@@ -137,13 +138,36 @@ application_matches: Final = {
 
 class UHIDTestDevice(BaseDevice):
     def __init__(self, name, application, rdesc_str=None, rdesc=None, input_info=None):
-        super().__init__(name, application, rdesc_str, rdesc, input_info)
-        self.application_matches = application_matches
-        if name is None:
-            name = f"uhid test {self.__class__.__name__}"
-        elif not name.startswith("uhid test "):
-            name = "uhid test " + name
-        self.name = name
+        try:
+            super().__init__(name, application, rdesc_str, rdesc, input_info)
+            self.application_matches = application_matches
+            if name is None:
+                name = f"uhid test {self.__class__.__name__}"
+            elif not name.startswith("uhid test "):
+                name = "uhid test " + name
+            self.name = name
+        except PermissionError:
+            pytest.skip("Insufficient permissions, run me as root")
+
+
+class UHIDTestGamepad(BaseGamepad):
+    def __init__(self, rdesc, application="Joystick", name=None, input_info=None):
+        try:
+            super().__init__(
+                rdesc=rdesc, name=name, application=application, input_info=input_info
+            )
+        except PermissionError:
+            pytest.skip("Insufficient permissions, run me as root")
+
+
+class UHIDTestJoystickGamepad(JoystickGamepad):
+    def __init__(self, rdesc, application="Joystick", name=None, input_info=None):
+        try:
+            super().__init__(
+                rdesc=rdesc, name=name, application=application, input_info=input_info
+            )
+        except PermissionError:
+            pytest.skip("Insufficient permissions, run me as root")
 
 
 @dataclasses.dataclass
