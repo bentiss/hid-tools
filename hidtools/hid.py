@@ -111,7 +111,7 @@ class HidCollection:
         USAGE_SWITCH: Final = 5
         USAGE_MODIFIER: Final = 6
 
-    def __init__(self: "HidCollection", value: U8) -> None:
+    def __init__(self, value: U8) -> None:
         assert value <= 0xFF
         self.value = value
         self.name = str(self)
@@ -122,11 +122,11 @@ class HidCollection:
             self.type = None
 
     @property
-    def is_reserved(self: "HidCollection") -> bool:
+    def is_reserved(self) -> bool:
         return 0x07 <= self.value <= 0x7F
 
     @property
-    def is_vendor_defined(self: "HidCollection") -> bool:
+    def is_vendor_defined(self) -> bool:
         return 0x80 <= self.value <= 0xFF
 
     @classmethod
@@ -148,7 +148,7 @@ class HidCollection:
 
         return int(match["value"], 16)
 
-    def __str__(self: "HidCollection") -> str:
+    def __str__(self) -> str:
         try:
             return HidCollection.Type(self.value).name
         except ValueError:
@@ -210,12 +210,12 @@ class RangeError(Exception):
         The :class:`HidField` that triggered this exception
     """
 
-    def __init__(self: "RangeError", field: "HidField", value: int) -> None:
+    def __init__(self, field: "HidField", value: int) -> None:
         self.field = field
         self.range = field.logical_min, field.logical_max
         self.value = value
 
-    def __str__(self: "RangeError") -> str:
+    def __str__(self) -> str:
         min, max = self.range
         return f"Value {self.value} is outside range {min}, {max} for {self.field.usage_name}"
 
@@ -279,7 +279,7 @@ class _HidRDescItem(object):
     """
 
     def __init__(
-        self: "_HidRDescItem",
+        self,
         index_in_report: int,
         hid: U16,
         value: int,
@@ -306,17 +306,17 @@ class _HidRDescItem(object):
         if self.item == "Unit Exponent" and self.value > 7:
             self.value -= 16
 
-    def _twos_comp(self: "_HidRDescItem") -> int:
+    def _twos_comp(self) -> int:
         self.value = twos_comp(self.value, (self.size - 1) * 8)
         return self.value
 
     @property
-    def size(self: "_HidRDescItem") -> int:
+    def size(self) -> int:
         """The size in bytes, including header byte"""
         return 1 + len(self.raw_value)
 
     @property
-    def bytes(self: "_HidRDescItem") -> list[U8]:
+    def bytes(self) -> list[U8]:
         """
         Return this in the original format in bytes, i.e. a header byte
         followed by (if any) payload bytes.
@@ -329,18 +329,18 @@ class _HidRDescItem(object):
             h = self.hid | len(self.raw_value)
         return [h] + self.raw_value.copy()
 
-    def __repr__(self: "_HidRDescItem") -> str:
+    def __repr__(self) -> str:
         data = [f"{i:02x}" for i in self.bytes]
         return f"{' '.join(data)}"
 
-    def _get_raw_values(self: "_HidRDescItem") -> str:
+    def _get_raw_values(self) -> str:
         """The raw values as comma-separated hex numbers"""
         data = str(self)
         # prefix each individual value by "0x" and insert "," in between
         data = f"0x{data.replace(' ', ', 0x')},"
         return data
 
-    def get_human_descr(self: "_HidRDescItem", indent: int) -> Tuple[str, int]:
+    def get_human_descr(self, indent: int) -> Tuple[str, int]:
         """
         Return a human-readable description of this item
 
@@ -643,7 +643,7 @@ class _HidRDescItem(object):
 
         return item
 
-    def dump_rdesc_kernel(self: "_HidRDescItem", indent: int, dump_file: IO) -> int:
+    def dump_rdesc_kernel(self, indent: int, dump_file: IO) -> int:
         """
         Write the HID item to the file a C-style format, e.g. ::
 
@@ -663,7 +663,7 @@ class _HidRDescItem(object):
         dump_file.write(f"\t{line}/* {descr}*/\n")
         return indent
 
-    def dump_rdesc_array(self: "_HidRDescItem", indent: int, dump_file: IO) -> int:
+    def dump_rdesc_array(self, indent: int, dump_file: IO) -> int:
         """
         Format the hid item in hexadecimal format with a
         double-slash comment, e.g. ::
@@ -683,7 +683,7 @@ class _HidRDescItem(object):
         dump_file.write(f"{line} // {descr} {str(offset)}\n")
         return indent
 
-    def dump_rdesc_human(self: "_HidRDescItem", indent: int, dump_file: IO) -> int:
+    def dump_rdesc_human(self, indent: int, dump_file: IO) -> int:
         """
         Format the hid item in human-only format e.g. ::
 
@@ -748,7 +748,7 @@ class HidUnit(object):
                 HidUnit.System.ENGLISH_ROTATION: "EnglishRotation",
             }
 
-        def __str__(self: "HidUnit.System") -> str:
+        def __str__(self) -> str:
             return self._stringmap()[self]
 
         @classmethod
@@ -764,7 +764,7 @@ class HidUnit(object):
                 return None
 
         @property
-        def length(self: "HidUnit.System") -> Optional["Unit"]:
+        def length(self) -> Optional["Unit"]:
             """
             Returns the right :class:`Unit` for the length measurement in
             this system.
@@ -778,7 +778,7 @@ class HidUnit(object):
             }[self]
 
         @property
-        def mass(self: "HidUnit.System") -> Optional["Unit"]:
+        def mass(self) -> Optional["Unit"]:
             """
             Returns the right :class:`Unit` for the mass measurement in
             this system.
@@ -792,7 +792,7 @@ class HidUnit(object):
             }[self]
 
         @property
-        def time(self: "HidUnit.System") -> Optional["Unit"]:
+        def time(self) -> Optional["Unit"]:
             """
             Returns the right :class:`Unit` for the time measurement in
             this system.
@@ -806,7 +806,7 @@ class HidUnit(object):
             }[self]
 
         @property
-        def temperature(self: "HidUnit.System") -> Optional["Unit"]:
+        def temperature(self) -> Optional["Unit"]:
             """
             Returns the right :class:`Unit` for the temperature measurement
             in this system.
@@ -820,7 +820,7 @@ class HidUnit(object):
             }[self]
 
         @property
-        def current(self: "HidUnit.System") -> Optional["Unit"]:
+        def current(self) -> Optional["Unit"]:
             """
             Returns the right :class:`Unit` for the current measurement
             in this system.
@@ -834,7 +834,7 @@ class HidUnit(object):
             }[self]
 
         @property
-        def luminous_intensity(self: "HidUnit.System") -> Optional["Unit"]:
+        def luminous_intensity(self) -> Optional["Unit"]:
             """
             Returns the right :class:`Unit` for the luminous intensity
             measurement in this system.
@@ -848,7 +848,7 @@ class HidUnit(object):
             }[self]
 
     def __init__(
-        self: "HidUnit", system: "HidUnit.System", units: dict[Optional["Unit"], U16]
+        self, system: "HidUnit.System", units: dict[Optional["Unit"], U16]
     ) -> None:
         self.units = units
         self.system = system
@@ -924,12 +924,12 @@ class HidUnit(object):
         assert value <= 0xFFFFFFFF
         return cls.from_bytes(value.to_bytes(byteorder="little", length=4))
 
-    def __eq__(self: "HidUnit", other: Any) -> bool:
+    def __eq__(self, other: Any) -> bool:
         if not isinstance(other, HidUnit):
             raise NotImplementedError
         return self.system == other.system and self.units == other.units
 
-    def __str__(self: "HidUnit") -> str:
+    def __str__(self) -> str:
         units = []
         for u, exp in self.units.items():
             if exp == 1:
@@ -975,7 +975,7 @@ class HidUnit(object):
         return HidUnit(system, units)
 
     @property
-    def value(self: "HidUnit") -> U32:
+    def value(self) -> U32:
         """
         Returns the numerical value for this unit as required by the HID
         specification.
@@ -1049,7 +1049,7 @@ class HidField(object):
     """
 
     def __init__(
-        self: "HidField",
+        self,
         report_ID: U8,
         logical: Optional[U32],
         physical: Optional[U32],
@@ -1086,7 +1086,7 @@ class HidField(object):
         self.count = count
         self.start = 0
 
-    def copy(self: "HidField") -> "HidField":
+    def copy(self) -> "HidField":
         """
         Return a full copy of this :class:`HIDField`.
         """
@@ -1095,7 +1095,7 @@ class HidField(object):
             c.usages = self.usages[:]
         return c
 
-    def _usage_name(self: "HidField", usage: U32) -> str:
+    def _usage_name(self, usage: U32) -> str:
         usage_page: U16 = usage >> 16
         value: U16 = usage & 0x0000FFFF
         if usage_page in HUT:  # type: ignore ### Operator "in" not supported for types "int" and "HidUsageTable"
@@ -1111,13 +1111,13 @@ class HidField(object):
         return name
 
     @property
-    def usage_name(self: "HidField") -> str:
+    def usage_name(self) -> str:
         """
         The Usage name for this field (e.g. "Wheel").
         """
         return self._usage_name(self.usage)
 
-    def get_usage_name(self: "HidField", index: int) -> Optional[str]:
+    def get_usage_name(self, index: int) -> Optional[str]:
         """
         Return the Usage name for this field at the given index. Use this
         function when the HID field has multiple Usages.
@@ -1127,7 +1127,7 @@ class HidField(object):
         return None
 
     @property
-    def physical_name(self: "HidField") -> Optional[str]:
+    def physical_name(self) -> Optional[str]:
         """
         The physical name or ``None``
         """
@@ -1148,7 +1148,7 @@ class HidField(object):
         return _phys
 
     @property
-    def logical_name(self: "HidField") -> Optional[str]:
+    def logical_name(self) -> Optional[str]:
         """
         The logical name or ``None``
         """
@@ -1169,7 +1169,7 @@ class HidField(object):
                 pass
         return _logical
 
-    def _get_value(self: "HidField", report: list[U8], idx: int) -> Union[U32, str]:
+    def _get_value(self, report: list[U8], idx: int) -> Union[U32, str]:
         """
         Extract the bits that are this HID field in the list of bytes
         ``report``
@@ -1195,7 +1195,7 @@ class HidField(object):
             value = twos_comp(value, self.size)
         return value
 
-    def get_values(self: "HidField", report: list[U8]) -> list[Union[U32, str]]:
+    def get_values(self, report: list[U8]) -> list[Union[U32, str]]:
         """
         Assume ``report`` is a list of bytes that are a full HID report,
         extract the values that are this HID field.
@@ -1212,7 +1212,7 @@ class HidField(object):
         """
         return [self._get_value(report, i) for i in range(self.count)]
 
-    def _fill_value(self: "HidField", report: list[U8], value: U32, idx: int) -> None:
+    def _fill_value(self, report: list[U8], value: U32, idx: int) -> None:
         start_bit = self.start + self.size * idx
         n = self.size
 
@@ -1241,7 +1241,7 @@ class HidField(object):
             report[byte_idx] &= ~(bit_mask << bit_shift)
             report[byte_idx] |= value << bit_shift
 
-    def fill_values_array(self: "HidField", report: list[U8], data: list[Any]) -> None:
+    def fill_values_array(self, report: list[U8], data: list[Any]) -> None:
         """
         Assuming ``data`` is the value for this HID field array and ``report``
         is a HID report's bytes, this method sets those bits in ``report`` that
@@ -1289,7 +1289,7 @@ class HidField(object):
 
             self._fill_value(report, v, idx)
 
-    def fill_values(self: "HidField", report: list[U8], data: list[U32]) -> None:
+    def fill_values(self, report: list[U8], data: list[U32]) -> None:
         """
         Assuming ``data`` is the value for this HID field and ``report`` is
         a HID report's bytes, this method sets those bits in ``report`` that
@@ -1330,28 +1330,28 @@ class HidField(object):
             self._fill_value(report, v, idx)
 
     @property
-    def is_array(self: "HidField") -> bool:
+    def is_array(self) -> bool:
         """
         ``True`` if this HID field is an array
         """
         return not (self.type & (0x1 << 1))  # Variable
 
     @property
-    def is_const(self: "HidField") -> bool:
+    def is_const(self) -> bool:
         """
         ``True`` if this HID field is const
         """
         return bool(self.type & (0x1 << 0))
 
     @property
-    def is_null(self: "HidField") -> bool:
+    def is_null(self) -> bool:
         """
         ``True`` if this HID field is null
         """
         return bool(self.type & (0x1 << 6))
 
     @property
-    def usage_page_name(self: "HidField") -> str:
+    def usage_page_name(self) -> str:
         """
         The Usage Page name for this field, e.g. "Generic Desktop"
         """
@@ -1485,7 +1485,7 @@ class HidReport(object):
         FEATURE: Final = enum.auto()
 
     def __init__(
-        self: "HidReport",
+        self,
         report_ID: U8,
         application: Optional[U32],
         type: "HidReport.Type",
@@ -1500,7 +1500,7 @@ class HidReport(object):
         self._type = type
         self.prev_collection: Optional[Tuple[U32, U32, U32]] = None
 
-    def append(self: "HidReport", field: HidField) -> None:
+    def append(self, field: HidField) -> None:
         """
         Add a :class:`HidField` to this report
 
@@ -1510,7 +1510,7 @@ class HidReport(object):
         field.start = self._bitsize
         self._bitsize += field.size
 
-    def extend(self: "HidReport", fields: list[HidField]) -> None:
+    def extend(self, fields: list[HidField]) -> None:
         """
         Extend this report by the list of :class:`HidField`
         objects
@@ -1523,7 +1523,7 @@ class HidReport(object):
             self._bitsize += f.size * f.count
 
     @property
-    def application_name(self: "HidReport") -> str:
+    def application_name(self) -> str:
         if self.application is None:
             return "Vendor"
 
@@ -1535,37 +1535,37 @@ class HidReport(object):
             return "Vendor"
 
     @property
-    def type(self: "HidReport") -> "HidReport.Type":
+    def type(self) -> "HidReport.Type":
         """
         One of the types in :class:`HidReport.Type`
         """
         return self._type
 
     @property
-    def numbered(self: "HidReport") -> bool:
+    def numbered(self) -> bool:
         """
         True if the HidReport was initialized with a report ID
         """
         return self.report_ID >= 0
 
     @property
-    def bitsize(self: "HidReport") -> int:
+    def bitsize(self) -> int:
         """
         The size of the HidReport in bits
         """
         return self._bitsize
 
     @property
-    def size(self: "HidReport") -> int:
+    def size(self) -> int:
         """
         The size of the HidReport in bytes
         """
         return self._bitsize >> 3
 
-    def __iter__(self: "HidReport") -> Iterator[HidField]:
+    def __iter__(self) -> Iterator[HidField]:
         return iter(self.fields)
 
-    def _fix_xy_usage_for_mt_devices(self: "HidReport", usage: str) -> str:
+    def _fix_xy_usage_for_mt_devices(self, usage: str) -> str:
         if usage not in self.prev_seen_usages:
             return usage
 
@@ -1584,7 +1584,7 @@ class HidReport(object):
         return usage
 
     def _format_one_event(
-        self: "HidReport",
+        self,
         data: list[Any],
         global_data: Any,
         hidInputItem: HidField,
@@ -1648,7 +1648,7 @@ class HidReport(object):
         self.prev_collection = hidInputItem.collection
         self.prev_seen_usages.append(usage)
 
-    def create_report(self: "HidReport", data: list[Any], global_data: Any) -> list[U8]:
+    def create_report(self, data: list[Any], global_data: Any) -> list[U8]:
         """
         Convert the data object to an array of ints representing this report.
         Each property of the given data object is matched against the field
@@ -1682,9 +1682,7 @@ class HidReport(object):
 
         return r
 
-    def format_report(
-        self: "HidReport", data: list[Any], split_lines: bool = True
-    ) -> str:
+    def format_report(self, data: list[Any], split_lines: bool = True) -> str:
         """
         Format the HID Report provided as a list of 8-bit integers into a
         human-readable format.
@@ -1831,7 +1829,7 @@ class ReportDescriptor(object):
         """
 
         def __init__(
-            self: "ReportDescriptor._Globals",
+            self,
             other: Optional["ReportDescriptor._Globals"] = None,
         ) -> None:
             self.usage_page: U16 = 0
@@ -1866,7 +1864,7 @@ class ReportDescriptor(object):
         apply until the next Output/InputReport/FeatureReport item.
         """
 
-        def __init__(self: "ReportDescriptor._Locals") -> None:
+        def __init__(self) -> None:
             self.usages: list[U32] = []
             self.usage_sizes: list[int] = []
             self.usage_min: U32 = 0
@@ -1874,7 +1872,7 @@ class ReportDescriptor(object):
             self.usage_max_size: U32 = 0
             self.report_ID: U8 = -1
 
-    def __init__(self: "ReportDescriptor", items: list[_HidRDescItem]) -> None:
+    def __init__(self, items: list[_HidRDescItem]) -> None:
         self.input_reports: dict[U8, HidReport] = {}
         self.feature_reports: dict[U8, HidReport] = {}
         self.output_reports: dict[U8, HidReport] = {}
@@ -1901,9 +1899,7 @@ class ReportDescriptor(object):
         del self.local
         del self.collection
 
-    def get(
-        self: "ReportDescriptor", reportID: U8, reportSize: int
-    ) -> Optional[HidReport]:
+    def get(self, reportID: U8, reportSize: int) -> Optional[HidReport]:
         """
         Return the input report with the given Report ID or ``None``
         """
@@ -1923,7 +1919,7 @@ class ReportDescriptor(object):
         return None
 
     def get_report_from_application(
-        self: "ReportDescriptor", application: Union[str, U32]
+        self, application: Union[str, U32]
     ) -> Optional[HidReport]:
         """
         Return the Input report that matches the application or ``None``
@@ -1933,7 +1929,7 @@ class ReportDescriptor(object):
                 return r
         return None
 
-    def _get_current_report(self: "ReportDescriptor", type: str) -> HidReport:
+    def _get_current_report(self, type: str) -> HidReport:
         report_lists = {
             "Input": self.input_reports,
             "Output": self.output_reports,
@@ -1956,7 +1952,7 @@ class ReportDescriptor(object):
             report_lists[type][self.local.report_ID] = cur
         return cur
 
-    def _concatenate_usages(self: "ReportDescriptor") -> None:
+    def _concatenate_usages(self) -> None:
         if self.local.usage_max and self.local.usage_max_size <= 2:
             if self.local.usage_max & 0xFFFF0000 != self.glob.usage_page:
                 self.local.usage_max &= 0xFFFF
@@ -1971,7 +1967,7 @@ class ReportDescriptor(object):
                 break
             self.local.usages[i] = v & 0xFFFF | self.glob.usage_page
 
-    def _parse_item(self: "ReportDescriptor", rdesc_item: _HidRDescItem) -> None:
+    def _parse_item(self, rdesc_item: _HidRDescItem) -> None:
         # store current usage_page in rdesc_item
         rdesc_item.usage_page = self.glob.usage_page
         item = rdesc_item.item
@@ -2080,9 +2076,7 @@ class ReportDescriptor(object):
             self.local.usage_max = 0
             self.local.usage_max_size = 0
 
-    def dump(
-        self: "ReportDescriptor", dump_file=sys.stdout, output_type="default"
-    ) -> None:
+    def dump(self, dump_file=sys.stdout, output_type="default") -> None:
         """
         Write this ReportDescriptor into the given file
 
@@ -2114,14 +2108,14 @@ class ReportDescriptor(object):
                 indent = rdesc_item.dump_rdesc_human(indent, dump_file)
 
     @property
-    def size(self: "ReportDescriptor") -> int:
+    def size(self) -> int:
         """
         Returns the size of the report descriptor in bytes.
         """
         return sum([item.size for item in self.rdesc_items])
 
     @property
-    def bytes(self: "ReportDescriptor") -> list[U8]:
+    def bytes(self) -> list[U8]:
         """
         This report descriptor as a list of 8-bit integers.
         """
@@ -2200,7 +2194,7 @@ class ReportDescriptor(object):
         return ReportDescriptor(items)
 
     def create_report(
-        self: "ReportDescriptor",
+        self,
         data: Any,
         global_data: Optional[Any] = None,
         reportID: Optional[U8] = None,
@@ -2244,7 +2238,7 @@ class ReportDescriptor(object):
 
         return rdesc.create_report(data, global_data)
 
-    def format_report(self: "ReportDescriptor", data, split_lines=True):
+    def format_report(self, data, split_lines=True):
         """
         Format the HID Report provided as a list of 8-bit integers into a
         human-readable format.

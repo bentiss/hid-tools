@@ -132,7 +132,7 @@ class UHIDDevice(object):
     def _remove_fd_from_poll(cls: Type["UHIDDevice"], fd: int) -> None:
         cls._poll.unregister(fd)
 
-    def __init__(self: "UHIDDevice") -> None:
+    def __init__(self) -> None:
         self._name: Optional[str] = None
         self._phys: Optional[str] = ""
         self._rdesc: Optional[list[int]] = None
@@ -153,31 +153,29 @@ class UHIDDevice(object):
         self._append_fd_to_poll(self._fd, self._process_one_event)
         UHIDDevice._devices.append(self)
 
-    def __enter__(self: "UHIDDevice") -> "UHIDDevice":
+    def __enter__(self) -> "UHIDDevice":
         return self
 
-    def __exit__(self: "UHIDDevice", *exc_details) -> None:
+    def __exit__(self, *exc_details) -> None:
         if not self._is_destroyed:
             self.destroy()
 
     @property
-    def fd(self: "UHIDDevice") -> int:
+    def fd(self) -> int:
         """
         The fd to the ``/dev/uhid`` device node
         """
         return self._fd
 
     @property
-    def rdesc(self: "UHIDDevice") -> Optional[list[int]]:
+    def rdesc(self) -> Optional[list[int]]:
         """
         The device's report descriptor
         """
         return self._rdesc
 
     @rdesc.setter
-    def rdesc(
-        self: "UHIDDevice", rdesc: Union[hidtools.hid.ReportDescriptor, str, bytes]
-    ):
+    def rdesc(self, rdesc: Union[hidtools.hid.ReportDescriptor, str, bytes]):
         if isinstance(rdesc, hidtools.hid.ReportDescriptor):
             self.parsed_rdesc = rdesc
         else:
@@ -190,49 +188,49 @@ class UHIDDevice(object):
             self._rdesc = self.parsed_rdesc.bytes
 
     @property
-    def phys(self: "UHIDDevice") -> Optional[str]:
+    def phys(self) -> Optional[str]:
         """
         The device's phys string
         """
         return self._phys
 
     @phys.setter
-    def phys(self: "UHIDDevice", phys: str) -> None:
+    def phys(self, phys: str) -> None:
         self._phys = phys
 
     @property
-    def name(self: "UHIDDevice") -> Optional[str]:
+    def name(self) -> Optional[str]:
         """
         The devices HID name
         """
         return self._name
 
     @name.setter
-    def name(self: "UHIDDevice", name: str) -> None:
+    def name(self, name: str) -> None:
         self._name = name
 
     @property
-    def info(self: "UHIDDevice") -> Optional[Tuple[int, int, int]]:
+    def info(self) -> Optional[Tuple[int, int, int]]:
         """
         The devices's bus, vendor ID and product ID as tuple
         """
         return self._info
 
     @info.setter
-    def info(self: "UHIDDevice", info: Tuple[int, int, int]) -> None:
+    def info(self, info: Tuple[int, int, int]) -> None:
         self._info = info
         # In case bus type is passed as 'int', wrap it in BusType.
         self._bustype = info[0] if isinstance(info[0], BusType) else BusType(info[0])
 
     @property
-    def bus(self: "UHIDDevice") -> Optional[BusType]:
+    def bus(self) -> Optional[BusType]:
         """
         The device's bus type :class:`hidtools.util.BusType`
         """
         return self._bustype
 
     @property
-    def vid(self: "UHIDDevice") -> Optional[int]:
+    def vid(self) -> Optional[int]:
         """
         The device's 16-bit vendor ID
         """
@@ -241,7 +239,7 @@ class UHIDDevice(object):
         return self._info[1]
 
     @property
-    def pid(self: "UHIDDevice") -> Optional[int]:
+    def pid(self) -> Optional[int]:
         """
         The device's 16-bit product ID
         """
@@ -249,11 +247,11 @@ class UHIDDevice(object):
             return None
         return self._info[2]
 
-    def _call_set_report(self: "UHIDDevice", req: int, err: int) -> None:
+    def _call_set_report(self, req: int, err: int) -> None:
         buf = struct.pack("< L L H", UHIDDevice._UHID_SET_REPORT_REPLY, req, err)
         os.write(self._fd, buf)
 
-    def _call_get_report(self: "UHIDDevice", req: U8, data: list[U8], err: int) -> None:
+    def _call_get_report(self, req: U8, data: list[U8], err: int) -> None:
         bdata = bytes(data)
         buf = struct.pack(
             "< L L H H 4096s",
@@ -265,7 +263,7 @@ class UHIDDevice(object):
         )
         os.write(self._fd, buf)
 
-    def call_input_event(self: "UHIDDevice", _data: Iterable[int]) -> None:
+    def call_input_event(self, _data: Iterable[int]) -> None:
         """
         Send an input event from this device.
 
@@ -279,15 +277,13 @@ class UHIDDevice(object):
         os.write(self._fd, buf)
 
     @property
-    def sys_path(self: "UHIDDevice") -> Optional[Path]:
+    def sys_path(self) -> Optional[Path]:
         """
         The device's /sys path
         """
         return self._sys_path
 
-    def walk_sysfs(
-        self: "UHIDDevice", kind: str, glob: Optional[str] = None
-    ) -> Tuple[Path, ...]:
+    def walk_sysfs(self, kind: str, glob: Optional[str] = None) -> Tuple[Path, ...]:
         kinds: Final = {
             "evdev": "input/input*/event*",
             "hidraw": "hidraw/hidraw*",
@@ -321,7 +317,7 @@ class UHIDDevice(object):
         """
         return [f"/dev/{h.name}" for h in self.walk_sysfs("hidraw")]
 
-    def create_kernel_device(self: "UHIDDevice") -> None:
+    def create_kernel_device(self) -> None:
         """
         Create a kernel device from this device. Note that the device is not
         immediately ready to go after creation, you must wait for
@@ -381,7 +377,7 @@ class UHIDDevice(object):
                 self.hid_id = int(self._sys_path.name[15:], 16)
                 self._ready = True
 
-    def destroy(self: "UHIDDevice") -> None:
+    def destroy(self) -> None:
         """
         Destroy the device. The kernel will trigger the appropriate
         messages in response before removing the device.
@@ -406,7 +402,7 @@ class UHIDDevice(object):
         os.close(self._fd)
         self._is_destroyed = True
 
-    def start(self: "UHIDDevice", flags: int) -> None:
+    def start(self, flags: int) -> None:
         """
         Called when the uhid device is ready to accept IO.
 
@@ -415,7 +411,7 @@ class UHIDDevice(object):
         """
         logger.debug("start")
 
-    def stop(self: "UHIDDevice") -> None:
+    def stop(self) -> None:
         """
         Called when the uhid device no longer accepts IO.
 
@@ -424,7 +420,7 @@ class UHIDDevice(object):
         """
         logger.debug("stop")
 
-    def open(self: "UHIDDevice") -> None:
+    def open(self) -> None:
         """
         Called when a userspace client opens the created kernel device.
 
@@ -433,7 +429,7 @@ class UHIDDevice(object):
         """
         logger.debug("open {}".format(self.sys_path))
 
-    def close(self: "UHIDDevice") -> None:
+    def close(self) -> None:
         """
         Called when a userspace client closes the created kernel device.
 
@@ -445,9 +441,7 @@ class UHIDDevice(object):
         """
         logger.debug("close")
 
-    def set_report(
-        self: "UHIDDevice", req: int, rnum: int, rtype: int, data: list[int]
-    ) -> int:
+    def set_report(self, req: int, rnum: int, rtype: int, data: list[int]) -> int:
         """
         Callback invoked when a process calls SetReport on this UHID device.
 
@@ -464,7 +458,7 @@ class UHIDDevice(object):
         return 5  # EIO
 
     def _set_report(
-        self: "UHIDDevice", req: int, rnum: int, rtype: int, size: int, data: list[int]
+        self, req: int, rnum: int, rtype: int, size: int, data: list[int]
     ) -> None:
         logger.debug(
             "set report {} {} {} {} {} ".format(
@@ -475,9 +469,7 @@ class UHIDDevice(object):
         if self._ready:
             self._call_set_report(req, error)
 
-    def get_report(
-        self: "UHIDDevice", req: int, rnum: int, rtype: int
-    ) -> Tuple[int, list[U8]]:
+    def get_report(self, req: int, rnum: int, rtype: int) -> Tuple[int, list[U8]]:
         """
         Callback invoked when a process calls SetReport on this UHID device.
 
@@ -493,15 +485,13 @@ class UHIDDevice(object):
         """
         return (5, [])  # EIO
 
-    def _get_report(self: "UHIDDevice", req: int, rnum: int, rtype: int) -> None:
+    def _get_report(self, req: int, rnum: int, rtype: int) -> None:
         logger.debug("get report {} {} {}".format(req, rnum, rtype))
         error, data = self.get_report(req, rnum, rtype)
         if self._ready:
             self._call_get_report(req, data, error)
 
-    def output_report(
-        self: "UHIDDevice", data: list[int], size: int, rtype: int
-    ) -> None:
+    def output_report(self, data: list[int], size: int, rtype: int) -> None:
         """
         Callback invoked when a process sends raw data to the device.
 
@@ -513,7 +503,7 @@ class UHIDDevice(object):
             "output {} {} {}".format(rtype, size, [f"{d:02x}" for d in data[:size]])
         )
 
-    def _process_one_event(self: "UHIDDevice") -> None:
+    def _process_one_event(self) -> None:
         buf = os.read(self._fd, 4380)
         assert (len(buf) == 4380) or (len(buf) == 4376)
         evtype = struct.unpack_from("< L", buf)[0]
@@ -539,7 +529,7 @@ class UHIDDevice(object):
             self._output_report(data, size, rtype)
 
     def create_report(
-        self: "UHIDDevice",
+        self,
         data: Any,
         global_data=None,
         reportID: Optional[int] = None,

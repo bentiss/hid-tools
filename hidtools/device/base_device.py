@@ -120,10 +120,10 @@ class HIDIsReady(object):
     See :meth:`is_ready` for details.
     """
 
-    def __init__(self: "HIDIsReady", uhid: UHIDDevice) -> None:
+    def __init__(self, uhid: UHIDDevice) -> None:
         self.uhid = uhid
 
-    def is_ready(self: "HIDIsReady") -> HidReadiness:
+    def is_ready(self) -> HidReadiness:
         """
         Overwrite in subclasses: should return True or False whether
         the attached uhid device is ready or not.
@@ -136,7 +136,7 @@ class UdevHIDIsReady(HIDIsReady):
     _pyudev_monitor: ClassVar[Optional[pyudev.Monitor]] = None
     _uhid_devices: ClassVar[dict[int, HidReadiness]] = {}
 
-    def __init__(self: "UdevHIDIsReady", uhid: UHIDDevice) -> None:
+    def __init__(self, uhid: UHIDDevice) -> None:
         super().__init__(uhid)
         self._init_pyudev()
 
@@ -173,7 +173,7 @@ class UdevHIDIsReady(HIDIsReady):
 
             readiness.is_ready = ready
 
-    def is_ready(self: "UdevHIDIsReady") -> HidReadiness:
+    def is_ready(self) -> HidReadiness:
         try:
             return self._uhid_devices[self.uhid.hid_id]
         except KeyError:
@@ -182,7 +182,7 @@ class UdevHIDIsReady(HIDIsReady):
 
 class EvdevMatch(object):
     def __init__(
-        self: "EvdevMatch",
+        self,
         *,
         requires: list[Any] = [],
         excludes: list[Any] = [],
@@ -194,7 +194,7 @@ class EvdevMatch(object):
         self.req_properties = req_properties
         self.excl_properties = excl_properties
 
-    def is_a_match(self: "EvdevMatch", evdev: libevdev.Device) -> bool:
+    def is_a_match(self, evdev: libevdev.Device) -> bool:
         for m in self.requires:
             if not evdev.has(m):
                 return False
@@ -218,7 +218,7 @@ class EvdevDevice(object):
     and properties.
     """
 
-    def __init__(self: "EvdevDevice", sysfs: Path) -> None:
+    def __init__(self, sysfs: Path) -> None:
         self.sysfs = sysfs
         self.event_node: Any = None
         self.libevdev: Optional[libevdev.Device] = None
@@ -235,17 +235,17 @@ class EvdevDevice(object):
         self.open()
 
     @property
-    def name(self: "EvdevDevice") -> str:
+    def name(self) -> str:
         assert "NAME" in self.uevents
 
         return self.uevents["NAME"]
 
     @property
-    def evdev(self: "EvdevDevice") -> Path:
+    def evdev(self) -> Path:
         return Path("/dev/input") / self.sysfs.name
 
     def matches_application(
-        self: "EvdevDevice", application: str, matches: dict[str, EvdevMatch]
+        self, application: str, matches: dict[str, EvdevMatch]
     ) -> bool:
         if self.libevdev is None:
             return False
@@ -258,7 +258,7 @@ class EvdevDevice(object):
         )
         assert False  # hid-tools likely needs an update
 
-    def open(self: "EvdevDevice") -> libevdev.Device:
+    def open(self) -> libevdev.Device:
         self.event_node = open(self.evdev, "rb")
         self.libevdev = libevdev.Device(self.event_node)
 
@@ -270,7 +270,7 @@ class EvdevDevice(object):
 
         return self.libevdev
 
-    def close(self: "EvdevDevice") -> None:
+    def close(self) -> None:
         if self.libevdev is not None and self.libevdev.fd is not None:
             self.libevdev.fd.close()
             self.libevdev = None
@@ -314,7 +314,7 @@ class BaseDevice(UHIDDevice):
             self.rdesc = rdesc  # type: ignore
 
     @property
-    def power_supply_class(self: "BaseDevice") -> Optional[PowerSupply]:
+    def power_supply_class(self) -> Optional[PowerSupply]:
         ps = self.walk_sysfs("power_supply", "power_supply/*")
         if ps is None or len(ps) < 1:
             return None
@@ -322,7 +322,7 @@ class BaseDevice(UHIDDevice):
         return PowerSupply(ps[0])
 
     @property
-    def led_classes(self: "BaseDevice") -> list[LED]:
+    def led_classes(self) -> list[LED]:
         leds = self.walk_sysfs("led", "**/max_brightness")
         if leds is None:
             return []
@@ -330,15 +330,15 @@ class BaseDevice(UHIDDevice):
         return [LED(led.parent) for led in leds]
 
     @property
-    def kernel_is_ready(self: "BaseDevice") -> bool:
+    def kernel_is_ready(self) -> bool:
         return self._kernel_is_ready.is_ready().is_ready and self.started
 
     @property
-    def kernel_ready_count(self: "BaseDevice") -> int:
+    def kernel_ready_count(self) -> int:
         return self._kernel_is_ready.is_ready().count
 
     @property
-    def input_nodes(self: "BaseDevice") -> list[EvdevDevice]:
+    def input_nodes(self) -> list[EvdevDevice]:
         if self._input_nodes is not None:
             return self._input_nodes
 
@@ -409,11 +409,11 @@ class BaseDevice(UHIDDevice):
         return []
 
     @property
-    def application_matches(self: "BaseDevice") -> dict[str, EvdevMatch]:
+    def application_matches(self) -> dict[str, EvdevMatch]:
         return self._application_matches
 
     @application_matches.setter
-    def application_matches(self: "BaseDevice", data: dict[str, EvdevMatch]) -> None:
+    def application_matches(self, data: dict[str, EvdevMatch]) -> None:
         self._application_matches = data
 
     def get_evdev(self, application=None):

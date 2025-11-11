@@ -92,35 +92,33 @@ class HidUsage(Hashable):
 
     """
 
-    def __init__(
-        self: "HidUsage", usage_page: "HidUsagePage", usage: U16, name: str
-    ) -> None:
+    def __init__(self, usage_page: "HidUsagePage", usage: U16, name: str) -> None:
         self.usage_page = usage_page
         self.usage = usage
         self.name = name
 
     # Route everything down to the name, this way we basically behave like a
     # string
-    def __getattr__(self: "HidUsage", attr: str) -> Any:
+    def __getattr__(self, attr: str) -> Any:
         return getattr(self.name, attr)
 
-    def __repr__(self: "HidUsage") -> str:
+    def __repr__(self) -> str:
         return self.name
 
-    def __hash__(self: "HidUsage") -> int:
+    def __hash__(self) -> int:
         return hash(self.name)
 
-    def __str__(self: "HidUsage") -> str:
+    def __str__(self) -> str:
         return self.name
 
-    def __eq__(self: "HidUsage", other: object) -> bool:
+    def __eq__(self, other: object) -> bool:
         if isinstance(other, HidUsage):
             return self.name == other.name
         elif not isinstance(other, str):
             return NotImplemented
         return self.name == other
 
-    def __lt__(self: "HidUsage", other: object) -> bool:
+    def __lt__(self, other: object) -> bool:
         if isinstance(other, HidUsage):
             return self.name < other.name
         elif not isinstance(other, str):
@@ -163,13 +161,13 @@ class HidUsagePage(object):
         The assigned name for this usage Page, e.g. "Generic Desktop"
     """
 
-    def __init__(self: "HidUsagePage") -> None:
+    def __init__(self) -> None:
         self._usages: dict[U16, HidUsage] = {}
 
-    def __setitem__(self: "HidUsagePage", key: U16, value: HidUsage) -> None:
+    def __setitem__(self, key: U16, value: HidUsage) -> None:
         self._usages[key] = value
 
-    def __getitem__(self: "HidUsagePage", key: Union[str, U16, U32]) -> HidUsage:
+    def __getitem__(self, key: Union[str, U16, U32]) -> HidUsage:
         if isinstance(key, str):
             return self.from_name[key]
 
@@ -179,51 +177,51 @@ class HidUsagePage(object):
             key &= 0xFFFF
         return self._usages[key]
 
-    def __delitem__(self: "HidUsagePage", key: U16) -> None:
+    def __delitem__(self, key: U16) -> None:
         del self._usages[key]
 
-    def __iter__(self: "HidUsagePage") -> Iterator[U16]:
+    def __iter__(self) -> Iterator[U16]:
         return iter(self._usages)
 
-    def __len__(self: "HidUsagePage") -> int:
+    def __len__(self) -> int:
         return len(self._usages)
 
-    def __str__(self: "HidUsagePage") -> str:
+    def __str__(self) -> str:
         return self.page_name
 
-    def __repr__(self: "HidUsagePage") -> str:
+    def __repr__(self) -> str:
         return self.page_name
 
-    def items(self: "HidUsagePage") -> dict_items_usage:
+    def items(self) -> dict_items_usage:
         """
         Iterate over all elements, see :meth:`dict.items`
         """
         return self._usages.items()
 
     @property
-    def page_id(self: "HidUsagePage") -> U16:
+    def page_id(self) -> U16:
         """
         The numerical page ID for this usage page
         """
         return self._page_id
 
     @page_id.setter
-    def page_id(self: "HidUsagePage", page_id: U16) -> None:
+    def page_id(self, page_id: U16) -> None:
         self._page_id = page_id
 
     @property
-    def page_name(self: "HidUsagePage") -> str:
+    def page_name(self) -> str:
         """
         The assigned name for this Usage Page
         """
         return self._name
 
     @page_name.setter
-    def page_name(self: "HidUsagePage", name: str) -> None:
+    def page_name(self, name: str) -> None:
         self._name = name
 
     @property
-    def from_name(self: "HidUsagePage") -> dict[str, HidUsage]:
+    def from_name(self) -> dict[str, HidUsage]:
         """
         A dictionary using ``{ name: usage }`` mapping, to look up the
         :class:`HidUsage` based on a name.
@@ -237,7 +235,7 @@ class HidUsagePage(object):
             return self._inverted
 
     @property
-    def from_usage(self: "HidUsagePage") -> dict[U16, HidUsage]:
+    def from_usage(self) -> dict[U16, HidUsage]:
         """
         A dictionary using ``{ usage: name }`` mapping, to look up the name
         based on a page ID . This is the same as using the object itself.
@@ -272,13 +270,13 @@ class HidUsageTable(object):
         Generic Desktop
     """
 
-    def __init__(self: "HidUsageTable") -> None:
+    def __init__(self) -> None:
         self._pages: dict[U16, HidUsagePage] = {}
 
-    def __setitem__(self: "HidUsageTable", key: U16, value: HidUsagePage) -> None:
+    def __setitem__(self, key: U16, value: HidUsagePage) -> None:
         self._pages[key] = value
 
-    def __getitem__(self: "HidUsageTable", key: Union[str, U16]) -> HidUsagePage:
+    def __getitem__(self, key: Union[str, U16]) -> HidUsagePage:
         if isinstance(key, str):
             return self.usage_page_names[key]
 
@@ -287,23 +285,23 @@ class HidUsageTable(object):
             key >>= 16
         return self._pages[key]
 
-    def __delitem__(self: "HidUsageTable", key) -> None:
+    def __delitem__(self, key) -> None:
         del self._pages[key]
 
-    def __iter__(self: "HidUsageTable") -> Iterator[HidUsagePage]:
+    def __iter__(self) -> Iterator[HidUsagePage]:
         return iter(self._pages)
 
-    def __len__(self: "HidUsageTable") -> int:
+    def __len__(self) -> int:
         return len(self._pages)
 
-    def items(self: "HidUsageTable") -> dict_items_usagePage:
+    def items(self) -> dict_items_usagePage:
         """
         Iterate over all elements, see :meth:`dict.items`
         """
         return self._pages.items()
 
     @property
-    def usage_pages(self: "HidUsageTable") -> dict[U16, HidUsagePage]:
+    def usage_pages(self) -> dict[U16, HidUsagePage]:
         """
         A dictionary mapping ``{page_id : object}``. These two are
         equivalent calls: ::
@@ -315,7 +313,7 @@ class HidUsageTable(object):
         return self._pages
 
     @property
-    def usage_page_names(self: "HidUsageTable") -> dict[str, HidUsagePage]:
+    def usage_page_names(self) -> dict[str, HidUsagePage]:
         """
         A dictionary mapping ``{page_name : object}``. These two are
         equivalent calls: ::
@@ -326,9 +324,7 @@ class HidUsageTable(object):
         """
         return {v.page_name: v for _, v in self.items()}
 
-    def usage_page_from_name(
-        self: "HidUsageTable", page_name: str
-    ) -> Optional[HidUsagePage]:
+    def usage_page_from_name(self, page_name: str) -> Optional[HidUsagePage]:
         """
         Look up the usage page based on the page name (e.g. "Generic
         Desktop"). This is identical to ::
@@ -345,9 +341,7 @@ class HidUsageTable(object):
         except KeyError:
             return None
 
-    def usage_page_from_page_id(
-        self: "HidUsageTable", page_id: U16
-    ) -> Optional[HidUsagePage]:
+    def usage_page_from_page_id(self, page_id: U16) -> Optional[HidUsagePage]:
         """
         Look up the usage page based on the page ID. This is identical to ::
 
