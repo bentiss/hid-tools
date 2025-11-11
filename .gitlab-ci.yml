@@ -153,6 +153,7 @@ python formatting:
   extends: .default_image
   stage: build
   script:
+    - ruff --version
     - ruff format --diff .
 
 python lint:
