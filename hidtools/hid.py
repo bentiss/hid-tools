@@ -1500,6 +1500,8 @@ class HidReport(object):
         self._type = type
         self.prev_collection: Optional[Tuple[U32, U32, U32]] = None
 
+        self.prev_seen_usages: list[str] = []
+
     def append(self, field: HidField) -> None:
         """
         Add a :class:`HidField` to this report
@@ -1666,7 +1668,7 @@ class HidReport(object):
         The HidReport will create the report according to the device's
         report descriptor.
         """
-        self.prev_seen_usages: list[str] = []
+        self.prev_seen_usages = []
         self.prev_collection = None
         r = [0] * self.size
 
@@ -1695,7 +1697,7 @@ class HidReport(object):
 
         output = ""
 
-        self.prev_seen_usages: list[str] = []
+        self.prev_seen_usages = []
         self.prev_collection = None
         sep = ""
         if self.numbered:

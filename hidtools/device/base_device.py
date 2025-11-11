@@ -435,6 +435,8 @@ class BaseDevice(UHIDDevice):
                     if self.match_evdev_rule(application, _evdev.libevdev):
                         return _evdev.libevdev
 
+        return None
+
     def is_ready(self):
         """Returns whether a UHID device is ready. Can be overwritten in
         subclasses to add extra conditions on when to consider a UHID
