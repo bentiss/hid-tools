@@ -1,8 +1,8 @@
 #!/usr/bin/python3
 
-import os
 import sys
 import io
+from pathlib import Path
 from hatchling.builders.hooks.plugin.interface import BuildHookInterface
 
 
@@ -45,15 +45,14 @@ class ManPageGenerator(BuildHookInterface):
             return
 
         # now do the actual conversion
-        here = "."
-        mandir = os.path.join(here, "man")
-        destdir = os.path.join(here, "dist", "man")
-        os.makedirs(destdir, exist_ok=True)
-        for f in os.listdir(mandir):
-            if f.endswith(".md"):
-                path = os.path.join(mandir, f)
-                name = os.path.splitext(f)[0]
-                outfile = os.path.join(destdir, f"{name}.1")
+        here = Path(".")
+        mandir = here / "man"
+        destdir = here / "dist" / "man"
+        destdir.mkdir(parents=True, exist_ok=True)
+        for f in mandir.iterdir():
+            if f.suffix == ".md":
+                name = f.stem
+                outfile = destdir / f"{name}.1"
                 pypandoc.convert_file(
-                    path, "man", outputfile=outfile, extra_args=["-s"]
+                    str(f), "man", outputfile=str(outfile), extra_args=["-s"]
                 )

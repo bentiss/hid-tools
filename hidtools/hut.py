@@ -18,7 +18,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 
-import os
+from pathlib import Path
 from re import Match
 import parse
 import functools
@@ -44,8 +44,8 @@ else:
     from typing_extensions import TypeAlias
 
 DATA_DIRNAME = "data"
-SCRIPT_DIR = os.path.dirname(os.path.realpath(__file__))
-DATA_DIR = os.path.join(SCRIPT_DIR, DATA_DIRNAME)
+SCRIPT_DIR = Path(__file__).resolve().parent
+DATA_DIR = SCRIPT_DIR / DATA_DIRNAME
 
 
 class ValueRange(NamedTuple):
@@ -447,15 +447,14 @@ class HidUsageTable(object):
         :return: a :class:`hidtools.HidUsageTable` object
         """
         hut = HidUsageTable()
-        for filename in os.listdir(DATA_DIR):
-            if filename.endswith(".hut"):
-                with open(os.path.join(DATA_DIR, filename), "r", encoding="utf-8") as f:
-                    try:
-                        usage_page = cls._parse_usages(f)
-                        hut[usage_page.page_id] = usage_page
-                    except:
-                        print(filename)
-                        raise
+        for filepath in DATA_DIR.glob("*.hut"):
+            with filepath.open("r", encoding="utf-8") as f:
+                try:
+                    usage_page = cls._parse_usages(f)
+                    hut[usage_page.page_id] = usage_page
+                except Exception:
+                    print(filepath.name)
+                    raise
 
         return hut
 

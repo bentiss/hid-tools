@@ -19,7 +19,7 @@
 
 
 import click
-import os
+from pathlib import Path
 import re
 import sys
 import hidtools.hid
@@ -50,9 +50,9 @@ def open_devnode_rdesc(path):
 
     node = path[len("/dev/input/") :]
     # should use pyudev here, but let's keep that for later
-    sysfs = f"/sys/class/input/{node}/device/device/report_descriptor"
+    sysfs = Path(f"/sys/class/input/{node}/device/device/report_descriptor")
 
-    if not os.path.exists(sysfs):
+    if not sysfs.exists():
         raise Oops(
             f"Unable to find report descriptor for {path}, is this a HID device?"
         )
@@ -115,17 +115,17 @@ def interpret_file_libinput_record(fd):
 
 
 def open_report_descriptor(path):
-    abspath = os.path.abspath(path)
+    abspath = Path(path).resolve()
     logger.debug(f"Processing {abspath}")
 
-    if os.path.isdir(abspath) or not os.path.exists(abspath):
+    if abspath.is_dir() or not abspath.exists():
         raise Oops(f"Invalid path: {path}")
 
-    if re.match("/sys/.*/report_descriptor", abspath):
+    if re.match("/sys/.*/report_descriptor", str(abspath)):
         return open_sysfs_rdesc(path)
-    if re.match("/dev/input/event[0-9]+", abspath):
+    if re.match("/dev/input/event[0-9]+", str(abspath)):
         return open_devnode_rdesc(path)
-    if re.match("/dev/hidraw[0-9]+", abspath):
+    if re.match("/dev/hidraw[0-9]+", str(abspath)):
         return open_hidraw(path)
     rdesc = open_binary(path)
     if rdesc is not None:
