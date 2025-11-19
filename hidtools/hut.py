@@ -288,7 +288,7 @@ class HidUsageTable(object):
     def __delitem__(self, key) -> None:
         del self._pages[key]
 
-    def __iter__(self) -> Iterator[HidUsagePage]:
+    def __iter__(self) -> Iterator[U16]:
         return iter(self._pages)
 
     def __len__(self) -> int:
