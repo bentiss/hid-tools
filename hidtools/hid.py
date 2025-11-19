@@ -103,13 +103,13 @@ superscripts: Final = {
 
 class HidCollection:
     class Type(enum.IntEnum):
-        PHYSICAL: Final = 0
-        APPLICATION: Final = 1
-        LOGICAL: Final = 2
-        REPORT: Final = 3
-        NAMED_ARRAY: Final = 4
-        USAGE_SWITCH: Final = 5
-        USAGE_MODIFIER: Final = 6
+        PHYSICAL = 0
+        APPLICATION = 1
+        LOGICAL = 2
+        REPORT = 3
+        NAMED_ARRAY = 4
+        USAGE_SWITCH = 5
+        USAGE_MODIFIER = 6
 
     def __init__(self, value: U8) -> None:
         assert value <= 0xFF
@@ -700,18 +700,18 @@ class _HidRDescItem(object):
 
 
 class Unit(enum.Enum):
-    CENTIMETER: Final = "cm"
-    RADIANS: Final = "rad"
-    INCH: Final = "in"
-    DEGREES: Final = "deg"
-    GRAM: Final = "g"
-    SLUG: Final = "slug"
-    SECONDS: Final = "s"
-    KELVIN: Final = "K"
-    FAHRENHEIT: Final = "F"
-    AMPERE: Final = "A"
-    CANDELA: Final = "cd"
-    RESERVED: Final = "reserved"
+    CENTIMETER = "cm"
+    RADIANS = "rad"
+    INCH = "in"
+    DEGREES = "deg"
+    GRAM = "g"
+    SLUG = "slug"
+    SECONDS = "s"
+    KELVIN = "K"
+    FAHRENHEIT = "F"
+    AMPERE = "A"
+    CANDELA = "cd"
+    RESERVED = "reserved"
 
 
 class HidUnit(object):
@@ -732,11 +732,11 @@ class HidUnit(object):
     NONE: Final = cast("HidUnit", None)  # For Unit(None), makes the code more obvious
 
     class System(enum.IntEnum):
-        NONE: Final = 0
-        SI_LINEAR: Final = 1
-        SI_ROTATION: Final = 2
-        ENGLISH_LINEAR: Final = 3
-        ENGLISH_ROTATION: Final = 4
+        NONE = 0
+        SI_LINEAR = 1
+        SI_ROTATION = 2
+        ENGLISH_LINEAR = 3
+        ENGLISH_ROTATION = 4
 
         @classmethod
         def _stringmap(cls: _Type["HidUnit.System"]) -> dict["HidUnit.System", str]:
@@ -1480,9 +1480,9 @@ class HidReport(object):
     class Type(enum.Enum):
         """The type of a :class:`HidReport`"""
 
-        INPUT: Final = enum.auto()
-        OUTPUT: Final = enum.auto()
-        FEATURE: Final = enum.auto()
+        INPUT = enum.auto()
+        OUTPUT = enum.auto()
+        FEATURE = enum.auto()
 
     def __init__(
         self,
