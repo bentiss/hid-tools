@@ -20,7 +20,7 @@ classifiers = [
 ]
 dependencies = [
     "click",
-    "libevdev",
+    "libevdev >= 0.13",
     "parse",
     "pyroute2",
     "pyyaml",
