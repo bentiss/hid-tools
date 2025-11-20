@@ -29,12 +29,10 @@ from typing import (
     Annotated,
     Any,
     Hashable,
-    Iterator,
     NamedTuple,
     Optional,
     Type,
     Union,
-    cast,
 )
 
 if sys.version_info >= (3, 10):
@@ -126,7 +124,7 @@ class HidUsage(Hashable):
         return self.name < other
 
 
-class HidUsagePage(object):
+class HidUsagePage(dict[U16, HidUsage]):
     """
     A dictionary of HID Usages in the form ``{usage: usage_name}``,
     representing all Usages in this Usage Page.
@@ -161,12 +159,6 @@ class HidUsagePage(object):
         The assigned name for this usage Page, e.g. "Generic Desktop"
     """
 
-    def __init__(self) -> None:
-        self._usages: dict[U16, HidUsage] = {}
-
-    def __setitem__(self, key: U16, value: HidUsage) -> None:
-        self._usages[key] = value
-
     def __getitem__(self, key: Union[str, U16, U32]) -> HidUsage:
         if isinstance(key, str):
             return self.from_name[key]
@@ -175,28 +167,13 @@ class HidUsagePage(object):
         # matches
         if key > 0xFFFF and key & 0xFFFF0000 == self.page_id << 16:
             key &= 0xFFFF
-        return self._usages[key]
-
-    def __delitem__(self, key: U16) -> None:
-        del self._usages[key]
-
-    def __iter__(self) -> Iterator[U16]:
-        return iter(self._usages)
-
-    def __len__(self) -> int:
-        return len(self._usages)
+        return super().__getitem__(key)
 
     def __str__(self) -> str:
         return self.page_name
 
     def __repr__(self) -> str:
         return self.page_name
-
-    def items(self) -> dict_items_usage:
-        """
-        Iterate over all elements, see :meth:`dict.items`
-        """
-        return self._usages.items()
 
     @property
     def page_id(self) -> U16:
@@ -240,10 +217,10 @@ class HidUsagePage(object):
         A dictionary using ``{ usage: name }`` mapping, to look up the name
         based on a page ID . This is the same as using the object itself.
         """
-        return cast(dict[U16, HidUsage], self)
+        return self
 
 
-class HidUsageTable(object):
+class HidUsageTable(dict[U16, HidUsagePage]):
     """
     This effectively a dictionary of all HID Usages known to man. Or to this
     module at least. This object is a singleton, it is available as
@@ -270,12 +247,6 @@ class HidUsageTable(object):
         Generic Desktop
     """
 
-    def __init__(self) -> None:
-        self._pages: dict[U16, HidUsagePage] = {}
-
-    def __setitem__(self, key: U16, value: HidUsagePage) -> None:
-        self._pages[key] = value
-
     def __getitem__(self, key: Union[str, U16]) -> HidUsagePage:
         if isinstance(key, str):
             return self.usage_page_names[key]
@@ -283,22 +254,7 @@ class HidUsageTable(object):
         # shift the usage page bits down if we have a 32-bit usage
         if key & 0xFFFF0000 == key:
             key >>= 16
-        return self._pages[key]
-
-    def __delitem__(self, key) -> None:
-        del self._pages[key]
-
-    def __iter__(self) -> Iterator[U16]:
-        return iter(self._pages)
-
-    def __len__(self) -> int:
-        return len(self._pages)
-
-    def items(self) -> dict_items_usagePage:
-        """
-        Iterate over all elements, see :meth:`dict.items`
-        """
-        return self._pages.items()
+        return super().__getitem__(key)
 
     @property
     def usage_pages(self) -> dict[U16, HidUsagePage]:
@@ -310,7 +266,7 @@ class HidUsageTable(object):
             HUT.usage_pages[0x1]
 
         """
-        return self._pages
+        return self
 
     @property
     def usage_page_names(self) -> dict[str, HidUsagePage]:
