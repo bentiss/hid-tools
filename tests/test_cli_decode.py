@@ -252,7 +252,7 @@ class TestHidRecorderOnUHIDDevice:
         except PermissionError:
             pytest.skip("Insufficient permissions, run me as root")
         uhid_device.create_kernel_device()
-        while not uhid_device.device_nodes:
+        while not uhid_device.device_nodes or not uhid_device.hidraw_nodes:
             uhid_device.dispatch(10)
 
         yield uhid_device
