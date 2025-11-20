@@ -73,9 +73,9 @@ variables:
     perl-Encode
     jq
     virtme-ng
-  FDO_DISTRIBUTION_VERSION: 42
+  FDO_DISTRIBUTION_VERSION: 43
   FDO_UPSTREAM_REPO: 'libevdev/hid-tools'
-  TEST_CONTAINER_TAG: '2025-05-15.1'
+  TEST_CONTAINER_TAG: '2025-11-20.1'
   # Fedora 42 ships with gcc15 which defaults to c23, this creates multiple
   # build issues on kernel < 6.15, so stick to 41 for now.
   FDO_KERNEL_BUILD_DISTRIBUTION_VERSION: 41
